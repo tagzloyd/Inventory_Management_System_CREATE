@@ -6,6 +6,7 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, BoxIcon, CogIcon, Folder, LayoutGrid, PanelBottom, PanelTopCloseIcon, TruckIcon, Warehouse } from 'lucide-react';
 import AppLogo from './app-logo';
+import Categories from '@/pages/Inventory/Categories';
 
 const mainNavItems: NavItem[] = [
     {
@@ -14,20 +15,25 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+        title: 'Office/Categories',
+        href: '/categories',
+        icon: Folder
+    },
+    {
         title: 'Inventory',
         href: '/inventory',
         icon:  Warehouse
     },
-    {
-        title: 'Supply',
-        href: '/supply',
-        icon: BoxIcon
-    },
-    {
-        title: 'Shipping',
-        href: '/shipping',
-        icon: TruckIcon
-    },
+    // {
+    //     title: 'Supply',
+    //     href: '/supply',
+    //     icon: BoxIcon
+    // },
+    // {
+    //     title: 'Shipping',
+    //     href: '/shipping',
+    //     icon: TruckIcon
+    // },
     {
         title: 'Records',
         href: '/records',
