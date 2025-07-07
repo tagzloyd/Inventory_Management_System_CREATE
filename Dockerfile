@@ -28,9 +28,8 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
-RUN php artisan config:cache\
-
+RUN php artisan config:cache
 
 EXPOSE 8000
 
-CMD php artisan serve --host=192.168.1.70 --port=8000
+CMD php artisan serve --host=0.0.0.0 --port=8000
