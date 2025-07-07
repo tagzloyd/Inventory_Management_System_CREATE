@@ -297,7 +297,7 @@ import { useEffect, useState } from "react";
                                                     className="ml-1"
                                                     style={{ backgroundColor: '#f0f0f0', color: '#333', cursor: 'pointer', transition: 'background-color 0.2s ease', 'borderColor': '#ccc', 'borderWidth': '1px',
                                                         'borderStyle': 'solid', 'borderRadius': '4px', 'padding': '0.25rem 0.5rem', 'fontSize': '0.875rem', 'fontWeight': '500', 'display': 'inline-flex', 'alignItems': 'center', 'gap': '0.25rem',
-                                                        'textDecoration': 'none', ':hover': { backgroundColor: '#e0e0e0' }
+                                                        'textDecoration': 'none'
                                                         }}
                                                 >
                                                     {item.remarks === "Non-Functionable" ? (
