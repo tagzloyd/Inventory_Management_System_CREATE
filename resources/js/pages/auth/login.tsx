@@ -88,15 +88,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             <div className="grid gap-2">
                                 <div className="flex items-center">
                                     <Label htmlFor="password" className="text-[#0C4B33]">Password</Label>
-                                    {/* {canResetPassword && (
-                                        <TextLink 
-                                            href={route('password.request')} 
-                                            className="ml-auto text-sm text-[#0C4B33] hover:text-[#0D5A3D]" 
-                                            tabIndex={5}
-                                        >
-                                            Forgot password?
-                                        </TextLink>
-                                    )} */}
                                 </div>
                                 <Input
                                     id="password"
