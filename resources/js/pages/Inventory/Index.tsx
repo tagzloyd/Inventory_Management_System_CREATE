@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
     import axios from "axios";
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';
-    import { Building2, FolderKanban, Package2 } from "lucide-react"; // shadcn/lucide icons
+    import { Building2, FolderKanban, Package2, PenIcon, Trash2Icon } from "lucide-react"; // shadcn/lucide icons
     import { BadgeCheck, Ban } from "lucide-react";
 
     // --- Notification component ---
@@ -291,28 +291,19 @@ import { useEffect, useState } from "react";
                                             {/* Actions */}
                                             <TableCell className="text-right space-x-2">
                                                 <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleEdit(item)}
-                                                >
-                                                    Edit
-                                                </Button>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    onClick={() => handleDelete(item.id!)}
-                                                >
-                                                    Delete
-                                                </Button>
-                                                <Button
                                                     variant="outline" 
                                                     size="sm"
                                                     onClick={() => handleToggleRemarks(item)}
                                                     className="ml-1"
+                                                    style={{ backgroundColor: '#f0f0f0', color: '#333', cursor: 'pointer', transition: 'background-color 0.2s ease', 'borderColor': '#ccc', 'borderWidth': '1px',
+                                                        'borderStyle': 'solid', 'borderRadius': '4px', 'padding': '0.25rem 0.5rem', 'fontSize': '0.875rem', 'fontWeight': '500', 'display': 'inline-flex', 'alignItems': 'center', 'gap': '0.25rem',
+                                                        'textDecoration': 'none', ':hover': { backgroundColor: '#e0e0e0' }
+                                                        }}
                                                 >
                                                     {item.remarks === "Non-Functionable" ? (
                                                         <>
                                                             <BadgeCheck className="w-4 h-4 mr-1" />
+
                                                             Mark as Function
                                                         </>
                                                     ) : (
@@ -322,6 +313,22 @@ import { useEffect, useState } from "react";
                                                         </>
                                                     )}
                                                 </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handleEdit(item)}
+                                                    style={{ backgroundColor: '#f0f0f0', color: '#333' }}
+                                                >
+                                                    <PenIcon className="w-4 h-4 mr-1" />
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={() => handleDelete(item.id!)}
+                                                >
+                                                    <Trash2Icon className="w-4 h-4 mr-1" />
+                                                </Button>
+                                                
                                             </TableCell>
                                         </TableRow>
                                     ))
