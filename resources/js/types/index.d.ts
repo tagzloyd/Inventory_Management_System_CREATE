@@ -41,3 +41,25 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+export interface Faculty {
+    id: number;
+    faculty_name: string;
+    office_id: number;
+    email?: string;
+    phone_number?: string;
+    office?: {
+        id: number;
+        office_name: string;
+    };
+}
+
+export interface Office {
+    id: number;
+    office_name: string;
+}
+
+export interface BreadcrumbItem {
+    title: string;
+    href: string;
+    disabled?: boolean;
+}

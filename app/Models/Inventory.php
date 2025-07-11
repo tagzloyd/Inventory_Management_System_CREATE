@@ -7,25 +7,34 @@ use Illuminate\Database\Eloquent\Model;
 class Inventory extends Model
 {
     protected $table = 'inventory';
-
+    
     protected $fillable = [
-        'category_id',
-        'office_id',
         'equipment_name',
-        'model',
+        'faculty_id',
+        'office_id',
         'serial_number',
         'date_acquired',
         'notes',
-        'remarks', // Added remarks field
+        'remarks',
     ];
 
-    public function category()
+    public function categories()
     {
-        return $this->belongsTo(Categories::class); // Changed from Category::class to Categories::class
+        return $this->belongsToMany(Category::class, 'inventory_category');
     }
 
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
+    }
     public function office()
     {
         return $this->belongsTo(Office::class);
     }
+
+    public function faculty()
+    {
+        return $this->belongsTo(Faculty::class);
+    }
+
 }

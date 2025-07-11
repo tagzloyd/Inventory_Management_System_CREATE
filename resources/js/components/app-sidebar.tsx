@@ -1,47 +1,87 @@
-import { NavFooter } from '@/components/nav-footer';
+
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
+// import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, BoxIcon, CogIcon, Folder, LayoutGrid, PanelBottom, PanelTopCloseIcon, TruckIcon, Warehouse } from 'lucide-react';
+import { BookMarkedIcon, BookOpen, BoxIcon, Calendar1Icon, CalendarArrowDown, CalendarClockIcon, Circle, CogIcon, Folder, LayoutGrid, LucidePersonStanding, PanelBottom, PanelTopCloseIcon, PersonStanding, ReceiptPoundSterlingIcon, TruckIcon, Warehouse, WarehouseIcon } from 'lucide-react';
 import AppLogo from './app-logo';
-import Categories from '@/pages/Inventory/Categories';
+import { NavGroup } from '@/types';
 
-const mainNavItems: NavItem[] = [
+// const mainNavItems: NavItem[] = [
+//     {
+//         title: 'Dashboard',
+//         href: '/dashboard',
+//         icon: LayoutGrid,
+//     },
+//     {
+//         title: 'Office/Categories',
+//         href: '/categories',
+//         icon: Folder
+//     },
+//     {
+//         title: 'Records',
+//         href: '/records',
+//         icon: BookOpen
+//     }
+// ];
+const secondaryNavItems: NavGroup[] = [
     {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Office/Categories',
-        href: '/categories',
-        icon: Folder
+        title: 'Main',
+        items: [
+            {
+                title: 'Dashboard',
+                href: '/dashboard',
+                icon: LayoutGrid,
+            }
+        ],
     },
     {
         title: 'Inventory',
-        href: '/inventory',
-        icon:  Warehouse
+        items: [            
+            {
+                title: 'Office/Categories',
+                href: '/categories',
+                icon: Folder,
+            },
+            {
+                title:  'Equipments',
+                href: '/inventory',
+                icon: WarehouseIcon,
+            },
+            {
+                title: 'Faculties',
+                href: '/faculty',
+                icon: PersonStanding,
+            }
+        ],
     },
-    // {
-    //     title: 'Supply',
-    //     href: '/supply',
-    //     icon: BoxIcon
-    // },
-    // {
-    //     title: 'Shipping',
-    //     href: '/shipping',
-    //     icon: TruckIcon
-    // },
     {
-        title: 'Records',
-        href: '/records',
-        icon: BookOpen
+        title: 'Reports',
+        items: [
+            {
+                title: 'Records',
+                href: '/records',
+                icon: BookMarkedIcon,
+            },
+        ],
+    },
+    {
+        title: 'Schedules',
+        items: [
+            {
+                title: 'Calendar',
+                href: '/schedule',
+                icon: CalendarClockIcon,
+            },
+            {
+                title: 'Timetable',
+                href: '/timetable',
+                icon: PanelTopCloseIcon,
+            },
+        ],
     }
-
 ];
-
 
 export function AppSidebar() {
     return (
@@ -59,7 +99,18 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                
+                <SidebarMenu>
+                    {secondaryNavItems.map((group) => (
+                        <SidebarMenuItem key={group.title}>
+                            <SidebarMenuButton>
+                                {group.title}
+                            </SidebarMenuButton>
+                            <NavMain items={group.items} />
+                        </SidebarMenuItem>
+                    ))}
+                </SidebarMenu>
+                {/* <NavMain items={mainNavItems} /> */}
             </SidebarContent>
 
             <SidebarFooter>

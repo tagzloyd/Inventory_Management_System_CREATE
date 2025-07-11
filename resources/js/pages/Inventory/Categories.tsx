@@ -14,7 +14,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 type Category = {
     id: number;
-    category_name: string;
+    name: string;
     inventories_count: number;
 };
 
@@ -26,7 +26,7 @@ type Office = {
 
 export default function Categories() {
     const [categories, setCategories] = useState<Category[]>([]);
-    const [category_name, setCategoryName] = useState('');
+    const [name, setCategoryName] = useState('');
     const [editId, setEditId] = useState<number | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -55,9 +55,9 @@ export default function Categories() {
         e.preventDefault();
         try {
             if (editId) {
-                await axios.put(`/api/categories/${editId}`, { category_name });
+                await axios.put(`/api/categories/${editId}`, { name });
             } else {
-                await axios.post('/api/categories', { category_name });
+                await axios.post('/api/categories', { name });
             }
             setCategoryName('');
             setEditId(null);
@@ -85,7 +85,7 @@ export default function Categories() {
 
     const handleEdit = (cat: Category) => {
         setEditId(cat.id);
-        setCategoryName(cat.category_name);
+        setCategoryName(cat.name);
         setShowEditModal(true);
     };
 
@@ -93,7 +93,7 @@ export default function Categories() {
         e.preventDefault();
         try {
             if (editId) {
-                await axios.put(`/api/categories/${editId}`, { category_name });
+                await axios.put(`/api/categories/${editId}`, { name });
                 setEditId(null);
                 setCategoryName('');
                 setShowEditModal(false);
@@ -366,7 +366,7 @@ export default function Categories() {
                                                 className={idx % 2 === 0 ? "bg-white" : "bg-gray-50 hover:bg-green-50 transition"}
                                             >
                                                 <TableCell>{cat.id}</TableCell>
-                                                <TableCell>{cat.category_name}</TableCell>
+                                                <TableCell>{cat.name}</TableCell>
                                                 <TableCell className="text-center">{cat.inventories_count}</TableCell>
                                                 <TableCell className="text-center space-x-2">
                                                     <Button variant="outline" size="sm" onClick={() => handleEdit(cat)}>
@@ -411,7 +411,7 @@ export default function Categories() {
                             className="flex flex-col gap-4"
                         >
                             <Input
-                                value={category_name}
+                                value={name}
                                 onChange={e => setCategoryName(e.target.value)}
                                 placeholder="Category name"
                                 required
@@ -438,7 +438,7 @@ export default function Categories() {
                             className="flex flex-col gap-4"
                         >
                             <Input
-                                value={category_name}
+                                value={name}
                                 onChange={e => setCategoryName(e.target.value)}
                                 placeholder="Category name"
                                 required

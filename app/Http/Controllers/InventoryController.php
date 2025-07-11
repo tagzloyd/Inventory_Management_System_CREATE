@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Inventory;
 use App\Models\Categories; // Ensure this is the correct model for categories
 use Inertia\Inertia;
+use App\Models\Faculty; // Ensure this is the correct model for faculties
 
 class InventoryController extends Controller
 {
@@ -15,42 +16,57 @@ class InventoryController extends Controller
     }
     public function fetchInventory()
     {
-        return Inventory::with(['category', 'office'])->get();
+        return Inventory::with(['categories', 'office', 'faculty'])->get();
     }
-    public function store(Request $request)
+
+     public function fetchFaculties()
     {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'office_id' => 'required|exists:office,id',
-            'equipment_name' => 'required|string|max:255',
-            'model' => 'nullable|string|max:255',
-            'serial_number' => 'nullable|string|max:255',
-            'date_acquired' => 'required|date',
-            'notes' => 'nullable|string|max:1000',
-            'remarks' => 'nullable|string|max:1000', // Assuming you want to allow remarks
-        ]);
-
-        $inventory = Inventory::create($validated);
-
-        return response()->json($inventory);
+        return Faculty::all(['id', 'name']);
     }
+        public function store(Request $request)
+        {
+            $validated = $request->validate([
+                'office_id' => 'required|exists:offices,id',
+                'equipment_name' => 'required|string|max:255',
+                'faculty_id' => 'required|exists:faculty,id',
+                'serial_number' => 'nullable|string|max:255',
+                'date_acquired' => 'nullable|string|max:255',
+                'notes' => 'nullable|string|max:1000',
+                'remarks' => 'nullable|string|max:1000',
+                'category_ids' => 'array',
+                'category_ids.*' => 'exists:categories,id',
+            ]);
+
+            $inventory = Inventory::create($validated);
+            if (isset($validated['category_ids'])) {
+                $inventory->categories()->sync($validated['category_ids']);
+            }
+
+            return response()->json($inventory);
+        }
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'office_id' => 'required|exists:office,id', // Ensure office_id is validated
-            // 'office_id' is required to associate the inventory with an office
+            'office_id' => 'required|exists:offices,id',
             'equipment_name' => 'required|string|max:255',
-            'model' => 'nullable|string|max:255',
-            'serial_number' => 'nullable|string|max:255',
+            'faculty_id' => 'required|exists:faculty,id',
+            'serial_number' => 'nullable|string|max:255|unique:inventory,serial_number,'.$id,
             'date_acquired' => 'required|date',
             'notes' => 'nullable|string|max:1000',
-            'remarks' => 'nullable|string|max:1000', // Assuming you want to allow remarks
+            'remarks' => 'nullable|string|max:1000',
+            'category_ids' => 'array',
+            'category_ids.*' => 'exists:categories,id',
         ]);
+
         $inventory = Inventory::findOrFail($id);
         $inventory->update($validated);
+        
+        // Sync categories if provided
+        if (isset($validated['category_ids'])) {
+            $inventory->categories()->sync($validated['category_ids']);
+        }
 
-        return response()->json($inventory);
+        return response()->json($inventory->load('categories', 'office', 'faculty'));
     }
     public function destroy($id)
     {

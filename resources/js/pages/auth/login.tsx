@@ -52,7 +52,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             </div> */}
 
             <AuthLayout 
-                title="Welcome to CSU Inventory System"
+                title="Welcome to Inventory Management System"
                 description="Please log in to continue."
             >
                 <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">

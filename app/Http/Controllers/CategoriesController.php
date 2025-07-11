@@ -2,31 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Categories;
+use App\Models\Category;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CategoriesController extends Controller
 {
     public function index()
     {
-        return inertia('Inventory/Categories', [
-            'categories' => Categories::all()
+        return Inertia::render('Inventory/Categories', [
+            'category' => Category::withCount('inventories')->get()
         ]);
     }
 
     public function fetchCategories()
     {
-        return Categories::withCount('inventories')->get();
+        return Category::withCount('inventories')->get();
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'category_name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:categories,name',
         ]);
-        $category = Categories::create([
-            'category_name' => $validated['category_name']
-        ]);
+
+        $category = Category::create($validated);
 
         return response()->json($category);
     }
@@ -34,19 +34,21 @@ class CategoriesController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'category_name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:categories,name,'.$id,
         ]);
-        $category = Categories::findOrFail($id);
-        $category->update([
-            'category_name' => $validated['category_name']
-        ]);
+
+        $category = Category::findOrFail($id);
+        $category->update($validated);
 
         return response()->json($category);
     }
-    
+
     public function destroy($id)
     {
-        $category = Categories::findOrFail($id);
+        $category = Category::findOrFail($id);
+        
+        // Detach all inventory relationships before deleting
+        $category->inventories()->detach();
         $category->delete();
 
         return response()->noContent();

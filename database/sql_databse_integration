@@ -1,0 +1,76 @@
+CREATE TABLE category (
+  
+
+-- Offices table (consistent naming)
+CREATE TABLE offices (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    office_name VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE inventory (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    equipment_name VARCHAR(255) NOT NULL,
+    serial_number VARCHAR(255) NOT NULL UNIQUE,
+    date_acquired VARCHAR(255) NULL, -- <-- Add here as string
+    notes TEXT NULL,
+    remarks VARCHAR(255) DEFAULT 'Functional',
+    category_id BIGINT UNSIGNED NULL,
+    office_id BIGINT UNSIGNED NULL,
+    faculty_id BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    CONSTRAINT fk_inventory_office FOREIGN KEY (office_id) 
+        REFERENCES offices(id) ON DELETE SET NULL,
+    CONSTRAINT fk_inventory_faculty FOREIGN KEY (faculty_id) 
+        REFERENCES faculty(id) ON DELETE SET NULL
+    CONSTRAINT fk_inventory_category FOREIGN KEY (category_id)
+        REFERENCES category(id) ON DELETE SET NULL    
+
+) ENGINE=InnoDB;
+
+
+-- Category table (assuming this exists based on your junction table)
+CREATE TABLE category (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+) ENGINE=InnoDB;
+
+-- Junction table (corrected to reference singular inventory)
+CREATE TABLE inventory_category (
+    inventory_id BIGINT UNSIGNED NOT NULL,
+    category_id BIGINT UNSIGNED NOT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    PRIMARY KEY (inventory_id, category_id),
+    FOREIGN KEY (inventory_id) REFERENCES inventory(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Faculty table (corrected to reference offices)
+CREATE TABLE faculty (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    office_id BIGINT UNSIGNED NOT NULL,
+    email VARCHAR(255) NULL UNIQUE,
+    phone VARCHAR(255) NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (office_id) REFERENCES offices(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE schedule (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    inventory_id BIGINT UNSIGNED NOT NULL,
+    start_time DATETIME NOT NULL,
+    end_time DATETIME NOT NULL,
+    purpose VARCHAR(255) NOT NULL,
+    status VARCHAR(255) DEFAULT 'Scheduled',
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (inventory_id) REFERENCES inventory(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
