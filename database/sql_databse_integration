@@ -1,5 +1,3 @@
-CREATE TABLE category (
-  
 
 -- Offices table (consistent naming)
 CREATE TABLE offices (
@@ -24,7 +22,7 @@ CREATE TABLE inventory (
     CONSTRAINT fk_inventory_office FOREIGN KEY (office_id) 
         REFERENCES offices(id) ON DELETE SET NULL,
     CONSTRAINT fk_inventory_faculty FOREIGN KEY (faculty_id) 
-        REFERENCES faculty(id) ON DELETE SET NULL
+        REFERENCES faculty(id) ON DELETE SET NULL,
     CONSTRAINT fk_inventory_category FOREIGN KEY (category_id)
         REFERENCES category(id) ON DELETE SET NULL    
 

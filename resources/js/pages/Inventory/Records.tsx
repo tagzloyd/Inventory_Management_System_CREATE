@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from "@/components/ui/badge";
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Reports', href: '/records' },
@@ -13,7 +14,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 type InventoryItem = {
     id: number;
-    category?: { id: number; category_name: string };
+    categories: { id: number; name: string }[];
     office?: { id: number; office_name: string };
     equipment_name: string;
     serial_number: string;
@@ -26,7 +27,7 @@ type InventoryItem = {
 
 export default function InventoryRecords() {
     const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
-    const [categories, setCategories] = useState<{ id: number; category_name: string }[]>([]);
+    const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
     const [offices, setOffices] = useState<{ id: number; office_name: string }[]>([]);
     const [search, setSearch] = useState('');
     const [sortKey, setSortKey] = useState<keyof InventoryItem | ''>('');
@@ -59,9 +60,11 @@ export default function InventoryRecords() {
     const filteredData = useMemo(() => {
         let data = [...inventoryData];
 
-        // Filter by category
+        // Filter by categories
         if (filterCategory) {
-            data = data.filter(item => item.category?.id === filterCategory);
+            data = data.filter(item => 
+                item.categories.some(cat => cat.id === filterCategory)
+            );
         }
 
         // Filter by office
@@ -75,7 +78,7 @@ export default function InventoryRecords() {
             data = data.filter(item =>
                 item.equipment_name.toLowerCase().includes(s) ||
                 item.serial_number?.toLowerCase().includes(s) ||
-                item.category?.category_name.toLowerCase().includes(s) ||
+                item.categories.some(cat => cat.name.toLowerCase().includes(s)) ||
                 item.office?.office_name?.toLowerCase().includes(s) ||
                 item.date_acquired.toLowerCase().includes(s) ||
                 (item.notes?.toLowerCase().includes(s) ?? false)
@@ -87,10 +90,10 @@ export default function InventoryRecords() {
             data.sort((a, b) => {
                 let aValue: any = a[sortKey];
                 let bValue: any = b[sortKey];
-                // For category, sort by category_name
-                if (sortKey === 'category') {
-                    aValue = a.category?.category_name || '';
-                    bValue = b.category?.category_name || '';
+                // For categories, sort by first category name
+                if (sortKey === 'categories') {
+                    aValue = a.categories[0]?.name || '';
+                    bValue = b.categories[0]?.name || '';
                 }
                 // For office, sort by office_name
                 if (sortKey === 'office') {
@@ -108,9 +111,9 @@ export default function InventoryRecords() {
 
     // Export to CSV
     const exportCSV = () => {
-        const headers = ['Category', 'Office', 'Equipment Name', 'Serial Number', 'Date Acquired', 'Notes', 'Remarks'];
+        const headers = ['Categories', 'Office', 'Equipment Name', 'Serial Number', 'Date Acquired', 'Notes', 'Remarks'];
         const rows = filteredData.map(item => [
-            item.category?.category_name || '',
+            item.categories.map(cat => cat.name).join(', ') || '',
             item.office?.office_name || '',
             item.equipment_name,
             item.serial_number,
@@ -232,6 +235,15 @@ export default function InventoryRecords() {
                             width: 200px;
                             margin-bottom: 4px;
                         }
+                        .category-badge {
+                            display: inline-block;
+                            background: #f1f5f9;
+                            border: 1px solid #e5e7eb;
+                            border-radius: 9999px;
+                            padding: 2px 8px;
+                            font-size: 0.75rem;
+                            margin: 2px;
+                        }
                     </style>
                 </head>
                 <body>
@@ -263,7 +275,7 @@ export default function InventoryRecords() {
     };
 
     // Table column headers with sort
-    const renderSortIcon = (key: keyof InventoryItem | 'category' | 'office') => (
+    const renderSortIcon = (key: keyof InventoryItem | 'categories' | 'office') => (
         <span
             className="ml-1 cursor-pointer select-none"
             onClick={() => {
@@ -298,7 +310,7 @@ export default function InventoryRecords() {
                         >
                             <option value="">All Categories</option>
                             {categories.map(cat => (
-                                <option key={cat.id} value={cat.id}>{cat.category_name}</option>
+                                <option key={cat.id} value={cat.id}>{cat.name}</option>
                             ))}
                         </select>
                         <select
@@ -319,15 +331,9 @@ export default function InventoryRecords() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                {/* <TableHead className="w-10 cursor-pointer" onClick={() => { setSortKey('id'); setSortAsc(sortKey === 'id' ? !sortAsc : true); }}>
-                                    ID {renderSortIcon('id')}
-                                </TableHead> */}
-                                <TableHead className="cursor-pointer" onClick={() => { setSortKey('category'); setSortAsc(sortKey === 'category' ? !sortAsc : true); }}>
-                                    Category {renderSortIcon('category')}
+                                <TableHead className="cursor-pointer" onClick={() => { setSortKey('categories'); setSortAsc(sortKey === 'categories' ? !sortAsc : true); }}>
+                                    Category {renderSortIcon('categories')}
                                 </TableHead>
-                                {/* <TableHead className="cursor-pointer" onClick={() => { setSortKey('office'); setSortAsc(sortKey === 'office' ? !sortAsc : true); }}>
-                                    Office {renderSortIcon('office')}
-                                </TableHead> */}
                                 <TableHead className="cursor-pointer" onClick={() => { setSortKey('equipment_name'); setSortAsc(sortKey === 'equipment_name' ? !sortAsc : true); }}>
                                     Equipment Name {renderSortIcon('equipment_name')}
                                 </TableHead>
@@ -344,21 +350,36 @@ export default function InventoryRecords() {
                         <TableBody>
                             {filteredData.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="text-center text-gray-400 py-6">
+                                    <TableCell colSpan={6} className="text-center text-gray-400 py-6">
                                         No inventory data.
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 filteredData.map(item => (
                                     <TableRow key={item.id} className="hover:bg-blue-50 transition">
-                                        {/* <TableCell>{item.id}</TableCell> */}
-                                        <TableCell>{item.category?.category_name || 'N/A'}</TableCell>
-                                        {/* <TableCell>{item.office?.office_name || 'N/A'}</TableCell> */}
+                                        <TableCell>
+                                            <div className="flex flex-wrap gap-1">
+                                                {item.categories && item.categories.length > 0 ? (
+                                                    item.categories.map(cat => (
+                                                        <Badge key={cat.id} variant="outline">
+                                                            {cat.name}
+                                                        </Badge>
+                                                    ))
+                                                ) : (
+                                                    <span className="text-gray-400 italic">No categories</span>
+                                                )}
+                                            </div>
+                                        </TableCell>
                                         <TableCell>{item.equipment_name}</TableCell>
                                         <TableCell>{item.serial_number}</TableCell>
                                         <TableCell>{item.date_acquired}</TableCell>
                                         <TableCell>{item.notes || 'N/A'}</TableCell>
-                                        <TableCell>{item.remarks || 'N/A'}</TableCell>
+                                        <TableCell>
+                                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold
+                                                ${item.remarks === "Non-Functional" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
+                                                {item.remarks || 'Functional'}
+                                            </span>
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             )}

@@ -178,7 +178,7 @@ export default function Categories() {
                         <span className="bg-blue-100 text-blue-700 rounded-full p-2">
                             <Building2 className="w-5 h-5" />
                         </span>
-                        <h2 className="text-lg font-semibold">Office List</h2>
+                        <h2 className="text-lg font-semibold">Location</h2>
                     </div>
                     <Button
                         size="sm"
@@ -196,7 +196,7 @@ export default function Categories() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-24">ID</TableHead>
-                                <TableHead>Name</TableHead>
+                                <TableHead>Office</TableHead>
                                 <TableHead className="text-center">Total no. of Equipment</TableHead>
                                 <TableHead className="text-center">Actions</TableHead>
                             </TableRow>

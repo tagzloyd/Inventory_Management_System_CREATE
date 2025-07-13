@@ -51,7 +51,7 @@ class InventoryController extends Controller
             'equipment_name' => 'required|string|max:255',
             'faculty_id' => 'required|exists:faculty,id',
             'serial_number' => 'nullable|string|max:255|unique:inventory,serial_number,'.$id,
-            'date_acquired' => 'required|date',
+            'date_acquired' => 'nullable|required|max:255',
             'notes' => 'nullable|string|max:1000',
             'remarks' => 'nullable|string|max:1000',
             'category_ids' => 'array',

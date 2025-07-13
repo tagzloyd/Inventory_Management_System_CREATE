@@ -184,21 +184,27 @@ export default function InventoryIndex() {
     };
 
     const handleToggleRemarks = async (item: InventoryItem) => {
-        const newRemarks = item.remarks === "Non-Functional" ? "Functional" : "Non-Functional";
-        try {
-            await axios.put(`/api/inventory/${item.id}`, { ...item, remarks: newRemarks });
-            setNotification({
-                message: `Item marked as ${newRemarks}.`,
-                type: "success",
-            });
-            fetchInventory();
-        } catch (err) {
-            setNotification({
-                message: "Failed to update remarks.",
-                type: "error",
-            });
-        }
-    };
+    const newRemarks = item.remarks === "Non-Functional" ? "Functional" : "Non-Functional";
+    try {
+        await axios.put(`/api/inventory/${item.id}`, { 
+            ...item, 
+            remarks: newRemarks,
+            office_id: item.office?.id ?? item.office_id,
+            faculty_id: item.faculty?.id ?? item.faculty_id,
+            category_ids: item.categories?.map(cat => cat.id) || []
+        });
+        setNotification({
+            message: `Item marked as ${newRemarks}.`,
+            type: "success",
+        });
+        fetchInventory();
+    } catch (err) {
+        setNotification({
+            message: "Failed to update remarks.",
+            type: "error",
+        });
+    }
+};
 
     const filteredData = inventoryData.filter(item =>
         item.equipment_name.toLowerCase().includes(search.toLowerCase()) ||
