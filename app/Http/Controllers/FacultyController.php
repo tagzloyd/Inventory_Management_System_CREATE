@@ -14,9 +14,15 @@ class FacultyController extends Controller
 
     public function fetchFaculty()
     {
-        return Faculty::with('office')->get();
+        return Faculty::with(['office', 'inventory'])->get();
     }
-
+    public function getFacultyInventory($id)
+    {
+        $inventory = Inventory::where('faculty_id', $id)
+            ->with(['categories', 'office'])
+            ->get();
+        return response()->json($inventory);
+    }
     public function store(Request $request)
         {
             $validated = $request->validate([
@@ -55,7 +61,7 @@ class FacultyController extends Controller
 
     public function show($id)
     {
-        $faculty = Faculty::with('office')->findOrFail($id);
+        $faculty = Faculty::with(['office', 'inventory'])->findOrFail($id);
         return response()->json($faculty);
     }
 }

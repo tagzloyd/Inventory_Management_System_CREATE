@@ -30,7 +30,7 @@ CREATE TABLE inventory (
 
 
 -- Category table (assuming this exists based on your junction table)
-CREATE TABLE category (
+CREATE TABLE categories (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
     created_at TIMESTAMP NULL,

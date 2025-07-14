@@ -14,4 +14,8 @@ class Faculty extends Model
     {
         return $this->belongsTo(Office::class);
     }
+    public function inventory()
+    {
+        return $this->hasMany(Inventory::class);
+    }
 }

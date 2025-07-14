@@ -12,37 +12,43 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Toaster } from "@/components/ui/sonner";
 
 function Notification({
     message,
     type,
     onClose,
-    duration = 3000,
 }: {
     message: string,
     type: 'success' | 'error',
     onClose: () => void,
-    duration?: number
 }) {
     useEffect(() => {
-        if (!duration) return;
-        const timer = setTimeout(onClose, duration);
+        const timer = setTimeout(onClose, 3000);
         return () => clearTimeout(timer);
-    }, [onClose, duration]);
+    }, [onClose]);
 
     return (
-        <div className={`fixed top-6 right-6 z-[9999] px-4 py-3 rounded shadow-lg text-white transition-all
-            ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}>
-            <div className="flex items-center gap-2">
-                <span>{message}</span>
-                <button className="ml-2 text-white/80 hover:text-white" onClick={onClose}>×</button>
-            </div>
+        <div className={cn(
+            "fixed top-4 right-4 z-50 flex items-center gap-2 p-4 rounded-md shadow-lg",
+            type === 'success' ? 'bg-green-500 text-white' : 'bg-destructive text-white'
+        )}>
+            {type === 'success' ? (
+                <Check className="h-5 w-5" />
+            ) : (
+                <Ban className="h-5 w-5" />
+            )}
+            <span>{message}</span>
         </div>
     );
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Inventory', href: '/inventory' },
+  { title: 'Inventory Management', href: '/dashboard' },
+  { title: 'Equipment', href: '/inventory' },
 ];
 
 type Category = {
@@ -184,27 +190,21 @@ export default function InventoryIndex() {
     };
 
     const handleToggleRemarks = async (item: InventoryItem) => {
-    const newRemarks = item.remarks === "Non-Functional" ? "Functional" : "Non-Functional";
-    try {
-        await axios.put(`/api/inventory/${item.id}`, { 
-            ...item, 
-            remarks: newRemarks,
-            office_id: item.office?.id ?? item.office_id,
-            faculty_id: item.faculty?.id ?? item.faculty_id,
-            category_ids: item.categories?.map(cat => cat.id) || []
-        });
-        setNotification({
-            message: `Item marked as ${newRemarks}.`,
-            type: "success",
-        });
-        fetchInventory();
-    } catch (err) {
-        setNotification({
-            message: "Failed to update remarks.",
-            type: "error",
-        });
-    }
-};
+        const newRemarks = item.remarks === "Non-Functional" ? "Functional" : "Non-Functional";
+        try {
+            await axios.put(`/api/inventory/${item.id}`, { ...item, remarks: newRemarks });
+            setNotification({
+                message: `Item marked as ${newRemarks}.`,
+                type: "success",
+            });
+            fetchInventory();
+        } catch (err) {
+            setNotification({
+                message: "Failed to update remarks.",
+                type: "error",
+            });
+        }
+    };
 
     const filteredData = inventoryData.filter(item =>
         item.equipment_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -220,340 +220,394 @@ export default function InventoryIndex() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Inventory" />
-            <div className="p-8">
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                        <span className="bg-blue-100 text-blue-700 rounded-full p-2">
-                            <Package2 className="w-6 h-6" />
-                        </span>
-                        <h1 className="text-2xl font-bold text-gray-900">Inventory</h1>
-                    </div>
-                    <Button onClick={() => { setShowModal(true); setEditId(null); setForm({}); setSelectedCategories([]); }}>
-                        + Add Item
-                    </Button>
-                </div>
-                
-                <p className="mb-6 text-gray-600">
-                    Welcome to your inventory management page. Here you can add, edit, or remove equipment records.
-                </p>
-                
-                <div className="mb-4 flex justify-end">
-                    <Input
-                        placeholder="Search inventory..."
-                        value={search}
-                        onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
-                        className="w-64"
-                    />
-                </div>
-                
-                <div className="bg-white rounded-xl shadow border p-6">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Categories</TableHead>
-                                <TableHead>Faculty</TableHead>
-                                <TableHead>Equipment</TableHead>
-                                <TableHead>Date Acquired</TableHead>
-                                <TableHead>Notes</TableHead>
-                                <TableHead>Remarks</TableHead>
-                                <TableHead className="text-center w-40">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {pagedData.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={7} className="text-center text-gray-400 py-6">
-                                        No inventory data.
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                pagedData.map(item => (
-                                    <TableRow key={item.id} className="hover:bg-blue-50 transition">
-                                        <TableCell>
-                                            <div className="flex flex-wrap gap-1">
-                                                {item.categories && item.categories.length > 0 ? (
-                                                    item.categories.map(cat => (
-                                                        <Badge key={cat.id} variant="outline">
-                                                            {cat.name}
+            <Toaster />
+            <div className="space-y-2.5">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Inventory Management</CardTitle>
+                        <CardDescription>
+                            Manage your inventory categories and office locations
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex flex-col space-y-4">
+                            <div className="flex flex-col sm:flex-row justify-between gap-4">
+                                <Input
+                                    placeholder="Search inventory..."
+                                    value={search}
+                                    onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+                                    className="w-full sm:w-96"
+                                />
+                                <Button 
+                                    onClick={() => { 
+                                        setShowModal(true); 
+                                        setEditId(null); 
+                                        setForm({}); 
+                                        setSelectedCategories([]); 
+                                    }}
+                                    className="w-full sm:w-auto"
+                                >
+                                    <Package2 className="mr-2 h-4 w-4" />
+                                    Add Item
+                                </Button>
+                            </div>
+
+                            <div className="rounded-md border">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Categories</TableHead>
+                                            <TableHead>Faculty</TableHead>
+                                            <TableHead>Equipment</TableHead>
+                                            <TableHead>Date Acquired</TableHead>
+                                            <TableHead>Notes</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {pagedData.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
+                                                    No inventory items found.
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            pagedData.map(item => (
+                                                <TableRow key={item.id}>
+                                                    <TableCell>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {item.categories && item.categories.length > 0 ? (
+                                                                item.categories.map(cat => (
+                                                                    <Badge key={cat.id} variant="secondary">
+                                                                        {cat.name}
+                                                                    </Badge>
+                                                                ))
+                                                            ) : (
+                                                                <span className="text-muted-foreground text-sm">No categories</span>
+                                                            )}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {item.faculty?.name || <span className="text-muted-foreground">N/A</span>}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="font-medium">{item.equipment_name}</div>
+                                                        <div className="text-xs text-muted-foreground">
+                                                            Serial: {item.serial_number || 'N/A'}
+                                                        </div>
+                                                        {item.office?.office_name && (
+                                                            <div className="text-xs text-blue-600 mt-1">
+                                                                <Building2 className="inline mr-1 h-3 w-3" />
+                                                                {item.office.office_name}
+                                                            </div>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {item.date_acquired || <span className="text-muted-foreground">N/A</span>}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {item.notes || <span className="text-muted-foreground italic">No notes</span>}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge 
+                                                            variant={item.remarks === "Non-Functional" ? "destructive" : "default"}
+                                                            className="gap-1"
+                                                        >
+                                                            {item.remarks === "Non-Functional" ? (
+                                                                <>
+                                                                    <Ban className="h-3 w-3" />
+                                                                    Not Working
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <BadgeCheck className="h-3 w-3" />
+                                                                    Working
+                                                                </>
+                                                            )}
                                                         </Badge>
-                                                    ))
-                                                ) : (
-                                                    <span className="text-gray-400 italic">No categories</span>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            {item.faculty?.name || 'N/A'}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="font-medium text-gray-900">{item.equipment_name}</div>
-                                            <div className="text-xs text-gray-500">
-                                                Serial No: {item.serial_number || 'N/A'}
-                                            </div>
-                                            {item.office?.office_name && (
-                                                <div className="text-xs text-blue-700 mt-1">
-                                                    Located at {item.office.office_name}
-                                                </div>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {item.date_acquired || 'N/A'}
-                                        </TableCell>
-                                        <TableCell>
-                                            {item.notes || <span className="italic text-gray-400">No notes</span>}
-                                        </TableCell>
-                                        <TableCell>
-                                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold
-                                                ${item.remarks === "Non-Functional" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
-                                                {item.remarks === "Non-Functional" ? (
-                                                    <>
-                                                        <Ban className="w-4 h-4" />
-                                                        Not Working
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <BadgeCheck className="w-4 h-4" />
-                                                        Working
-                                                    </>
-                                                )}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="text-right space-x-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleToggleRemarks(item)}
-                                            >
-                                                {item.remarks === "Non-Functional" ? (
-                                                    <BadgeCheck className="w-4 h-4" />
-                                                ) : (
-                                                    <Ban className="w-4 h-4" />
-                                                )}
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleEdit(item)}
-                                            >
-                                                <PenIcon className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                variant="destructive"
-                                                size="sm"
-                                                onClick={() => handleDelete(item.id!)}
-                                            >
-                                                <Trash2Icon className="w-4 h-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                    
-                    <div className="flex justify-between items-center mt-4">
-                        <span className="text-sm text-gray-600">
-                            Page {currentPage} of {totalPages || 1}
-                        </span>
-                        <div className="space-x-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={currentPage === 1}
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                            >
-                                Previous
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={currentPage === totalPages || totalPages === 0}
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                            >
-                                Next
-                            </Button>
+                                                    </TableCell>
+                                                    <TableCell className="text-right space-x-1">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleToggleRemarks(item)}
+                                                            className="h-8 w-8 p-0"
+                                                            title={item.remarks === "Non-Functional" ? "Mark as working" : "Mark as not working"}
+                                                        >
+                                                            {item.remarks === "Non-Functional" ? (
+                                                                <BadgeCheck className="h-4 w-4" />
+                                                            ) : (
+                                                                <Ban className="h-4 w-4" />
+                                                            )}
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleEdit(item)}
+                                                            className="h-8 w-8 p-0"
+                                                            title="Edit"
+                                                        >
+                                                            <PenIcon className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleDelete(item.id!)}
+                                                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                                            title="Delete"
+                                                        >
+                                                            <Trash2Icon className="h-4 w-4" />
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+
+                            <div className="flex items-center justify-between px-2">
+                                <div className="text-sm text-muted-foreground">
+                                    Showing <strong>{pagedData.length}</strong> of <strong>{filteredData.length}</strong> items
+                                </div>
+                                <div className="flex space-x-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={currentPage === 1}
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    >
+                                        Previous
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={currentPage === totalPages || totalPages === 0}
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    >
+                                        Next
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
             </div>
 
             {/* Add/Edit Modal */}
-            {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-                    <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg relative">
-                        <button
-                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"
-                            onClick={() => { setShowModal(false); setEditId(null); setForm({}); setSelectedCategories([]); }}
-                            type="button"
-                        >
-                            ×
-                        </button>
-                        <h2 className="text-lg font-semibold mb-4">{editId ? "Edit Item" : "Add Item"}</h2>
-                        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Equipment Name*</label>
-                                <Input
-                                    value={form.equipment_name || ""}
-                                    onChange={e => setForm({ ...form, equipment_name: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Categories*</label>
-                                <Popover open={categoriesOpen} onOpenChange={setCategoriesOpen}>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            role="combobox"
-                                            aria-expanded={categoriesOpen}
-                                            className="w-full justify-between"
+            <Dialog open={showModal} onOpenChange={setShowModal}>
+                <DialogContent className="sm:max-w-[625px]">
+                    <DialogHeader>
+                        <DialogTitle>{editId ? "Edit Inventory Item" : "Add New Inventory Item"}</DialogTitle>
+                        <DialogDescription>
+                            {editId ? "Update the details below" : "Fill in the details for the new inventory item"}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium leading-none">Equipment Name</label>
+                            <Input
+                                value={form.equipment_name || ""}
+                                onChange={e => setForm({ ...form, equipment_name: e.target.value })}
+                                required
+                            />
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium leading-none">Categories</label>
+                            <Popover open={categoriesOpen} onOpenChange={setCategoriesOpen}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        aria-expanded={categoriesOpen}
+                                        className="w-full justify-between"
+                                    >
+                                        {selectedCategories.length > 0 
+                                            ? `${selectedCategories.length} selected`
+                                            : "Select categories..."}
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full p-0">
+                                    <Command>
+                                        <CommandInput placeholder="Search categories..." />
+                                        <CommandEmpty>No category found.</CommandEmpty>
+                                        <CommandGroup className="max-h-60 overflow-y-auto">
+                                            {categories.map((category) => (
+                                                <CommandItem
+                                                    key={category.id}
+                                                    onSelect={() => handleCategorySelect(category)}
+                                                >
+                                                    <Check
+                                                        className={cn(
+                                                            "mr-2 h-4 w-4",
+                                                            isCategorySelected(category) ? "opacity-100" : "opacity-0"
+                                                        )}
+                                                    />
+                                                    {category.name}
+                                                </CommandItem>
+                                            ))}
+                                        </CommandGroup>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                            <div className="flex flex-wrap gap-2">
+                                {selectedCategories.map((category) => (
+                                    <Badge key={category.id} className="flex items-center gap-1">
+                                        {category.name}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleCategorySelect(category)}
+                                            className="ml-1 text-xs"
                                         >
-                                            {selectedCategories.length > 0 
-                                                ? `${selectedCategories.length} selected`
-                                                : "Select categories..."}
-                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-full p-0">
-                                        <Command>
-                                            <CommandInput placeholder="Search categories..." />
-                                            <CommandEmpty>No category found.</CommandEmpty>
-                                            <CommandGroup className="max-h-60 overflow-y-auto">
-                                                {categories.map((category) => (
-                                                    <CommandItem
-                                                        key={category.id}
-                                                        onSelect={() => handleCategorySelect(category)}
-                                                    >
-                                                        <Check
-                                                            className={cn(
-                                                                "mr-2 h-4 w-4",
-                                                                isCategorySelected(category) ? "opacity-100" : "opacity-0"
-                                                            )}
-                                                        />
-                                                        {category.name}
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                    {selectedCategories.map((category) => (
-                                        <Badge key={category.id} className="flex items-center gap-1">
-                                            {category.name}
-                                            <button
-                                                type="button"
-                                                onClick={() => handleCategorySelect(category)}
-                                                className="ml-1 text-xs"
-                                            >
-                                                ×
-                                            </button>
-                                        </Badge>
-                                    ))}
-                                </div>
+                                            ×
+                                        </button>
+                                    </Badge>
+                                ))}
                             </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Office*</label>
-                                <select
-                                    className="border px-3 py-2 rounded w-full"
-                                    value={form.office_id || ""}
-                                    onChange={e => setForm({ ...form, office_id: Number(e.target.value) })}
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium leading-none">Office</label>
+                                <Select
+                                    value={form.office_id?.toString() || ""}
+                                    onValueChange={value => setForm({ ...form, office_id: Number(value) })}
                                     required
                                 >
-                                    <option value="">Select Office</option>
-                                    {offices.map(office => (
-                                        <option key={office.id} value={office.id}>
-                                            {office.office_name}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Office" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {offices.map(office => (
+                                            <SelectItem key={office.id} value={office.id.toString()}>
+                                                {office.office_name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                             
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Faculty*</label>
-                                <select
-                                    className="border px-3 py-2 rounded w-full"
-                                    value={form.faculty_id || ""}
-                                    onChange={e => setForm({ ...form, faculty_id: Number(e.target.value) })}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium leading-none">Faculty</label>
+                                <Select
+                                    value={form.faculty_id?.toString() || ""}
+                                    onValueChange={value => setForm({ ...form, faculty_id: Number(value) })}
                                     required
                                 >
-                                    <option value="">Select Faculty</option>
-                                    {faculties.map(faculty => (
-                                        <option key={faculty.id} value={faculty.id}>
-                                            {faculty.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Faculty" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {faculties.map(faculty => (
+                                            <SelectItem key={faculty.id} value={faculty.id.toString()}>
+                                                {faculty.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Serial Number</label>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium leading-none">Serial Number</label>
                                 <Input
                                     value={form.serial_number || ""}
                                     onChange={e => setForm({ ...form, serial_number: e.target.value })}
                                 />
                             </div>
                             
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Date Acquired*</label>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium leading-none">Date Acquired</label>
                                 <Input
-                                    
                                     value={form.date_acquired || ""}
                                     onChange={e => setForm({ ...form, date_acquired: e.target.value })}
                                     required
                                 />
                             </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Notes</label>
-                                <Input
-                                    value={form.notes || ""}
-                                    onChange={e => setForm({ ...form, notes: e.target.value })}
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Remarks</label>
-                                <Input
-                                    value={form.remarks || ""}
-                                    onChange={e => setForm({ ...form, remarks: e.target.value })}
-                                />
-                            </div>
-                            
-                            <div className="flex justify-end gap-2 mt-2">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => { setShowModal(false); setEditId(null); setForm({}); setSelectedCategories([]); }}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button type="submit">{editId ? "Update" : "Add"}</Button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Delete Confirmation Modal */}
-            {deleteId !== null && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-                    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm relative">
-                        <h2 className="text-lg font-semibold mb-4">Delete Item</h2>
-                        <p className="mb-6">Are you sure you want to delete this item?</p>
-                        <div className="flex justify-end gap-2">
-                            <Button variant="outline" onClick={() => setDeleteId(null)}>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium leading-none">Notes</label>
+                            <Input
+                                value={form.notes || ""}
+                                onChange={e => setForm({ ...form, notes: e.target.value })}
+                            />
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium leading-none">Status</label>
+                            <Select
+                                value={form.remarks || "Functional"}
+                                onValueChange={value => setForm({ ...form, remarks: value })}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Functional">
+                                        <div className="flex items-center gap-2">
+                                            <BadgeCheck className="h-4 w-4" />
+                                            Functional
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="Non-Functional">
+                                        <div className="flex items-center gap-2">
+                                            <Ban className="h-4 w-4" />
+                                            Non-Functional
+                                        </div>
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        
+                        <DialogFooter>
+                            <Button 
+                                type="button"
+                                variant="outline"
+                                onClick={() => { 
+                                    setShowModal(false); 
+                                    setEditId(null); 
+                                    setForm({}); 
+                                    setSelectedCategories([]); 
+                                }}
+                            >
                                 Cancel
                             </Button>
-                            <Button variant="destructive" onClick={confirmDelete}>
-                                Delete
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                            <Button type="submit">{editId ? "Update" : "Add"}</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Confirmation Modal */}
+            <Dialog open={deleteId !== null} onOpenChange={open => !open && setDeleteId(null)}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Confirm Deletion</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete this inventory item? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button 
+                            variant="outline"
+                            onClick={() => setDeleteId(null)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button 
+                            variant="destructive"
+                            onClick={confirmDelete}
+                        >
+                            Delete
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* Notification */}
             {notification && (
@@ -561,7 +615,6 @@ export default function InventoryIndex() {
                     message={notification.message}
                     type={notification.type}
                     onClose={() => setNotification(null)}
-                    duration={3000}
                 />
             )}
         </AppLayout>

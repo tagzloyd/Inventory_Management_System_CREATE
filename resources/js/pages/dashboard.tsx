@@ -3,7 +3,7 @@ import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import axios from "axios";
@@ -11,33 +11,37 @@ import {
   Package2, Layers3, ListChecks, ArrowUpRight, ArrowDownLeft, 
   AlertCircle, Clock, CalendarCheck, Search, Activity, AlertTriangle,
   PlusCircle, FileText, Bell, MessageSquare,
-  Check
+  Check, TrendingUp
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-    },
+  { title: 'Inventory Management', href: '/dashboard' },
 ];
 
 type Category = {
     id: number;
-    category_name: string;
+    name: string;
     inventories_count: number;
 };
 
 type InventoryItem = {
     id: number;
-    category?: { id: number; category_name: string };
+    category?: { id: number; name: string };
     equipment_name: string;
     serial_number: string;
     date_acquired: string;
     notes?: string;
-    remarks: string; // "Functional" or "Non-Functionable"
+    remarks: string; // "Functional" or "Non-Functional"
     office?: { id: number; office_name: string };
     warranty_expiry?: string;
     last_maintenance?: string;
@@ -87,21 +91,20 @@ export default function Dashboard() {
         setOffices(res.data);
     };
 
-
     // Quick stats
     const totalCategories = categories.length;
     const totalItems = inventory.length;
 
     // Count functional and non-functional equipment
-    const functionalCount = inventory.filter(i => i.remarks !== "Non-Functionable").length;
-    const nonFunctionalCount = inventory.filter(i => i.remarks === "Non-Functionable").length;
+    const functionalCount = inventory.filter(i => i.remarks !== "Non-Functional").length;
+    const nonFunctionalCount = inventory.filter(i => i.remarks === "Non-Functional").length;
     const functionalPercent = totalItems > 0 ? Math.round((functionalCount / totalItems) * 100) : 0;
     const nonFunctionalPercent = totalItems > 0 ? Math.round((nonFunctionalCount / totalItems) * 100) : 0;
 
     // Group non-functional equipment by office
     const nonFunctionalByOffice: { [officeName: string]: number } = {};
     inventory.forEach(i => {
-        if (i.remarks === "Non-Functionable") {
+        if (i.remarks === "Non-Functional") {
             const office = i.office?.office_name || "No Office";
             nonFunctionalByOffice[office] = (nonFunctionalByOffice[office] || 0) + 1;
         }
@@ -110,7 +113,7 @@ export default function Dashboard() {
     // Group functional equipment by office
     const functionalByOffice: { [officeName: string]: number } = {};
     inventory.forEach(i => {
-        if (i.remarks !== "Non-Functionable") {
+        if (i.remarks !== "Non-Functional") {
             const office = i.office?.office_name || "No Office";
             functionalByOffice[office] = (functionalByOffice[office] || 0) + 1;
         }
@@ -159,12 +162,19 @@ export default function Dashboard() {
         return dueDate < today && item.status !== 'completed';
     });
 
-    // Category distribution
-    const categoryDistribution = categories.map(category => ({
-        name: category.category_name,
+    // Category distribution data for the chart
+    const categoryChartData = categories.map(category => ({
+        name: category.name,
         count: category.inventories_count,
-        percentage: totalItems > 0 ? Math.round((category.inventories_count / totalItems) * 100) : 0
     }));
+
+    // Chart configuration
+    const chartConfig = {
+        count: {
+            label: "Equipment Count",
+            color: "var(--chart-1)",
+        },
+    } satisfies ChartConfig;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -251,33 +261,89 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Category Distribution */}
                     <Card>
-                        <CardHeader className="flex flex-row items-center gap-3">
-                            <div className="bg-purple-100 text-purple-700 rounded-full p-2">
-                                <Activity className="w-6 h-6" />
-                            </div>
-                            <CardTitle>Category Distribution</CardTitle>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-3">
+                                <div className="bg-purple-100 text-purple-700 rounded-full p-2">
+                                    <Activity className="w-6 h-6" />
+                                </div>
+                                Category Distribution
+                            </CardTitle>
+                            <CardDescription>
+                                Showing equipment count by category
+                            </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            {categoryDistribution.length === 0 ? (
+                            {categoryChartData.length === 0 ? (
                                 <div className="text-center text-muted-foreground py-4">
                                     No categories found
                                 </div>
                             ) : (
-                                <div className="space-y-2">
-                                    {categoryDistribution.map(category => (
-                                        <div key={category.name} className="space-y-1">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm font-medium">{category.name}</span>
-                                                <span className="text-xs text-muted-foreground">
-                                                    {category.count} ({category.percentage}%)
-                                                </span>
-                                            </div>
-                                            <Progress value={category.percentage} className="h-2" />
-                                        </div>
-                                    ))}
-                                </div>
+                                <ChartContainer config={chartConfig}>
+                                    <AreaChart
+                                        accessibilityLayer
+                                        data={categoryChartData}
+                                        margin={{
+                                            left: 12,
+                                            right: 12,
+                                        }}
+                                        height={200}
+                                    >
+                                        <CartesianGrid vertical={false} />
+                                        <XAxis
+                                            dataKey="name"
+                                            tickLine={false}
+                                            axisLine={false}
+                                            tickMargin={8}
+                                            tickFormatter={(value) => value.slice(0, 3)}
+                                        />
+                                        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                                        <defs>
+                                            <linearGradient id="fillCount" x1="0" y1="0" x2="0" y2="1">
+                                                <stop
+                                                    offset="5%"
+                                                    stopColor="var(--chart-1)"
+                                                    stopOpacity={0.8}
+                                                />
+                                                <stop
+                                                    offset="95%"
+                                                    stopColor="var(--chart-1)"
+                                                    stopOpacity={0.1}
+                                                />
+                                            </linearGradient>
+                                        </defs>
+                                        <Area
+                                            dataKey="count"
+                                            type="natural"
+                                            fill="url(#fillCount)"
+                                            fillOpacity={0.4}
+                                            stroke="var(--chart-1)"
+                                        />
+                                    </AreaChart>
+                                </ChartContainer>
                             )}
                         </CardContent>
+                        <CardFooter>
+                            <div className="flex w-full items-start gap-2 text-sm">
+                                <div className="grid gap-2">
+                                    <div className="flex items-center gap-2 leading-none font-medium">
+                                        {categoriesDiff > 0 ? (
+                                            <>
+                                                Trending up by {categoriesDiff} categories <TrendingUp className="h-4 w-4" />
+                                            </>
+                                        ) : categoriesDiff < 0 ? (
+                                            <>
+                                                Trending down by {Math.abs(categoriesDiff)} categories <TrendingUp className="h-4 w-4 rotate-180" />
+                                            </>
+                                        ) : (
+                                            "No change in categories"
+                                        )}
+                                    </div>
+                                    <div className="text-muted-foreground flex items-center gap-2 leading-none">
+                                        Total of {totalCategories} categories
+                                    </div>
+                                </div>
+                            </div>
+                        </CardFooter>
                     </Card>
                     {/* Recently Added Equipment */}
                     <div className="lg:col-span-2 bg-white rounded-xl shadow border p-6">
@@ -290,8 +356,6 @@ export default function Dashboard() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>ID</TableHead>
-                                    <TableHead>Category</TableHead>
                                     <TableHead>Equipment Name</TableHead>
                                     <TableHead>Serial Number</TableHead>
                                     <TableHead>Date Acquired</TableHead>
@@ -308,14 +372,12 @@ export default function Dashboard() {
                                 ) : (
                                     recentItems.map(item => (
                                         <TableRow key={item.id}>
-                                            <TableCell>{item.id}</TableCell>
-                                            <TableCell>{item.category?.category_name || 'N/A'}</TableCell>
                                             <TableCell>{item.equipment_name}</TableCell>
                                             <TableCell>{item.serial_number}</TableCell>
                                             <TableCell>{item.date_acquired}</TableCell>
                                             <TableCell>
-                                                <Badge variant={item.remarks === "Non-Functionable" ? "destructive" : "default"}>
-                                                    {item.remarks === "Non-Functionable" ? "Non-Functional" : "Functional"}
+                                                <Badge variant={item.remarks === "Non-Functional" ? "destructive" : "default"}>
+                                                    {item.remarks === "Non-Functional" ? "Non-Functional" : "Functional"}
                                                 </Badge>
                                             </TableCell>
                                         </TableRow>

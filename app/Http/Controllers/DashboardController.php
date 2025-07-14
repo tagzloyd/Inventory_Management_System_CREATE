@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Categories;
+use App\Models\Category;
 use App\Models\Office;
 use App\Models\Inventory;
 use App\Models\Maintenance;
@@ -14,13 +14,13 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalCategories = Categories::count();
+        $totalCategory = Category::count();
         $totalOffices = Office::count();
         $totalEquipment = Inventory::count();
 
         // Functional vs Non-Functional
-        $functionalCount = Inventory::where('remarks', '!=', 'Non-Functionable')->count();
-        $nonFunctionalCount = Inventory::where('remarks', 'Non-Functionable')->count();
+        $functionalCount = Inventory::where('remarks', '!=', 'Non-Functional')->count();
+        $nonFunctionalCount = Inventory::where('remarks', 'Non-Functional')->count();
 
         // Equipment by office
         $equipmentByOffice = Inventory::with('office')
@@ -34,7 +34,7 @@ class DashboardController extends Controller
 
         // Functional by office
         $functionalByOffice = Inventory::with('office')
-            ->where('remarks', '!=', 'Non-Functionable')
+            ->where('remarks', '!=', 'Non-Functional')
             ->selectRaw('office_id, count(*) as count')
             ->groupBy('office_id')
             ->get()
@@ -45,7 +45,7 @@ class DashboardController extends Controller
 
         // Non-functional by office
         $nonFunctionalByOffice = Inventory::with('office')
-            ->where('remarks', 'Non-Functionable')
+            ->where('remarks', 'Non-Functional')
             ->selectRaw('office_id, count(*) as count')
             ->groupBy('office_id')
             ->get()
@@ -55,19 +55,19 @@ class DashboardController extends Controller
             });
 
         // Category distribution
-        $categoryDistribution = Categories::withCount('inventories')
+        $categoryDistribution = Category::withCount('inventories')
             ->orderByDesc('inventories_count')
             ->get()
             ->map(function ($category) use ($totalEquipment) {
                 return [
-                    'name' => $category->category_name,
+                    'name' => $category->name,
                     'count' => $category->inventories_count,
                     'percentage' => $totalEquipment > 0 ? round(($category->inventories_count / $totalEquipment) * 100) : 0
                 ];
             });
 
         // Recent equipment
-        $recentEquipment = Inventory::with(['category', 'office'])
+        $recentEquipment = Inventory::with(['categories', 'office'])
             ->orderByDesc('date_acquired')
             ->take(5)
             ->get();
@@ -100,7 +100,7 @@ class DashboardController extends Controller
         $overdueMaintenance = $maintenanceItems->where('is_overdue', true);
 
         return Inertia::render('Dashboard', [
-            'totalCategories' => $totalCategories,
+            'totalCategory' => $totalCategory,
             'totalOffices' => $totalOffices,
             'totalEquipment' => $totalEquipment,
             'functionalCount' => $functionalCount,

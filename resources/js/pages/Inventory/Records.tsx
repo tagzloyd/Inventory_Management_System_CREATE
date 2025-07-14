@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from "@/components/ui/badge";
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Reports', href: '/records' },
+    { title: 'Inventory Management', href: '/dashboard'},
+    { title: 'Reports', href: '/records' }
 ];
 
 type InventoryItem = {
@@ -373,7 +374,7 @@ export default function InventoryRecords() {
                                         <TableCell>{item.equipment_name}</TableCell>
                                         <TableCell>{item.serial_number}</TableCell>
                                         <TableCell>{item.date_acquired}</TableCell>
-                                        <TableCell>{item.notes || 'N/A'}</TableCell>
+                                        <TableCell>{item.notes || <span className="text-muted-foreground italic">No notes</span>}</TableCell>
                                         <TableCell>
                                             <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold
                                                 ${item.remarks === "Non-Functional" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>

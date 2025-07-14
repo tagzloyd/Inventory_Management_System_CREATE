@@ -45,6 +45,7 @@ Route::controller(FacultyController::class)->group(function () {
     Route::put('faculties/{id}', 'update')->name('faculties.update');
     Route::delete('faculties/{id}', 'destroy')->name('faculties.destroy');
     Route::get('faculties/{id}', 'show')->name('faculties.show');
+    Route::get('/faculties/{id}/inventory','getFacultyInventory')->name('faculties.getFacultyInventory');
 });
 
 
