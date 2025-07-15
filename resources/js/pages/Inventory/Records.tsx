@@ -278,7 +278,7 @@ export default function InventoryRecords() {
     // Table column headers with sort
     const renderSortIcon = (key: keyof InventoryItem | 'categories' | 'office') => (
         <span
-            className="ml-1 cursor-pointer select-none"
+            className="ml-1 cursor-pointer h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 select-none"
             onClick={() => {
                 if (sortKey === key) setSortAsc(!sortAsc);
                 else { setSortKey(key as keyof InventoryItem); setSortAsc(true); }
@@ -332,20 +332,20 @@ export default function InventoryRecords() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="cursor-pointer" onClick={() => { setSortKey('categories'); setSortAsc(sortKey === 'categories' ? !sortAsc : true); }}>
+                                <TableHead className="cursor-pointer h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0" onClick={() => { setSortKey('categories'); setSortAsc(sortKey === 'categories' ? !sortAsc : true); }}>
                                     Category {renderSortIcon('categories')}
                                 </TableHead>
-                                <TableHead className="cursor-pointer" onClick={() => { setSortKey('equipment_name'); setSortAsc(sortKey === 'equipment_name' ? !sortAsc : true); }}>
+                                <TableHead className="cursor-pointer h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0" onClick={() => { setSortKey('equipment_name'); setSortAsc(sortKey === 'equipment_name' ? !sortAsc : true); }}>
                                     Equipment Name {renderSortIcon('equipment_name')}
                                 </TableHead>
-                                <TableHead className="cursor-pointer" onClick={() => { setSortKey('serial_number'); setSortAsc(sortKey === 'serial_number' ? !sortAsc : true); }}>
+                                <TableHead className="cursor-pointer h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0" onClick={() => { setSortKey('serial_number'); setSortAsc(sortKey === 'serial_number' ? !sortAsc : true); }}>
                                     Serial Number {renderSortIcon('serial_number')}
                                 </TableHead>
-                                <TableHead className="cursor-pointer" onClick={() => { setSortKey('date_acquired'); setSortAsc(sortKey === 'date_acquired' ? !sortAsc : true); }}>
+                                <TableHead className="cursor-pointer h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0" onClick={() => { setSortKey('date_acquired'); setSortAsc(sortKey === 'date_acquired' ? !sortAsc : true); }}>
                                     Date Acquired {renderSortIcon('date_acquired')}
                                 </TableHead>
-                                <TableHead>Notes</TableHead>
-                                <TableHead>Remarks</TableHead>
+                                <TableHead className='h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0'>Notes</TableHead>
+                                <TableHead className='h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0'>Remarks</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>

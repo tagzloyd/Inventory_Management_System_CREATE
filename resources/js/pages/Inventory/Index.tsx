@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 function Notification({
     message,
@@ -141,10 +142,10 @@ export default function InventoryIndex() {
             
             if (editId) {
                 await axios.put(`/api/inventory/${editId}`, payload);
-                setNotification({ message: "Item updated successfully!", type: "success" });
+                toast('Item updated successfully!');
             } else {
                 await axios.post('/api/inventory', payload);
-                setNotification({ message: "Item added successfully!", type: "success" });
+                toast('Item added successfully!');
             }
             setForm({});
             setSelectedCategories([]);
@@ -154,10 +155,7 @@ export default function InventoryIndex() {
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 
                             "Failed to save item. Please check your data.";
-            setNotification({ 
-                message: errorMessage, 
-                type: "error" 
-            });
+            toast.error(errorMessage);
         }
     };
 
@@ -180,10 +178,10 @@ export default function InventoryIndex() {
         if (deleteId !== null) {
             try {
                 await axios.delete(`/api/inventory/${deleteId}`);
-                setNotification({ message: "Item deleted successfully!", type: "success" });
+                toast("Item deleted successfully!");
                 fetchInventory();
             } catch (err) {
-                setNotification({ message: "Failed to delete item.", type: "error" });
+                toast("Failed to delete item.");
             }
             setDeleteId(null);
         }
@@ -193,26 +191,26 @@ export default function InventoryIndex() {
         const newRemarks = item.remarks === "Non-Functional" ? "Functional" : "Non-Functional";
         try {
             await axios.put(`/api/inventory/${item.id}`, { ...item, remarks: newRemarks });
-            setNotification({
-                message: `Item marked as ${newRemarks}.`,
-                type: "success",
-            });
+            toast(`Item marked as ${newRemarks}.`);
             fetchInventory();
         } catch (err) {
-            setNotification({
-                message: "Failed to update remarks.",
-                type: "error",
-            });
+            toast("Failed to Update Remark");
         }
     };
 
-    const filteredData = inventoryData.filter(item =>
-        item.equipment_name.toLowerCase().includes(search.toLowerCase()) ||
-        item.serial_number?.toLowerCase().includes(search.toLowerCase()) ||
-        item.categories?.some(cat => cat.name.toLowerCase().includes(search.toLowerCase())) ||
-        item.date_acquired.toLowerCase().includes(search.toLowerCase()) ||
-        (item.notes?.toLowerCase().includes(search.toLowerCase()) ?? false)
-    );
+    const filteredData = inventoryData.filter(item => {
+        const searchTerm = search.toLowerCase();
+        return (
+            item.equipment_name.toLowerCase().includes(searchTerm) ||
+            (item.serial_number?.toLowerCase().includes(searchTerm) || false) ||
+            (item.notes?.toLowerCase().includes(searchTerm) || false) ||
+            (item.date_acquired?.toLowerCase().includes(searchTerm) || false) ||
+            (item.remarks?.toLowerCase().includes(searchTerm) || false) ||
+            (item.office?.office_name.toLowerCase().includes(searchTerm) || false) ||
+            (item.faculty?.name.toLowerCase().includes(searchTerm) || false) ||
+            (item.categories?.some(cat => cat.name.toLowerCase().includes(searchTerm)) || false)
+        );
+    });
 
     const totalPages = Math.ceil(filteredData.length / pageSize);
     const pagedData = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -233,9 +231,12 @@ export default function InventoryIndex() {
                         <div className="flex flex-col space-y-4">
                             <div className="flex flex-col sm:flex-row justify-between gap-4">
                                 <Input
-                                    placeholder="Search inventory..."
+                                    placeholder="Search by equipment, serial, notes, office, faculty, or categories..."
                                     value={search}
-                                    onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+                                    onChange={e => { 
+                                        setSearch(e.target.value); 
+                                        setCurrentPage(1); 
+                                    }}
                                     className="w-full sm:w-96"
                                 />
                                 <Button 
@@ -254,7 +255,7 @@ export default function InventoryIndex() {
 
                             <div className="rounded-md border">
                                 <Table>
-                                    <TableHeader>
+                                    <TableHeader  className="bg-muted/50">
                                         <TableRow>
                                             <TableHead>Categories</TableHead>
                                             <TableHead>Faculty</TableHead>
@@ -262,7 +263,7 @@ export default function InventoryIndex() {
                                             <TableHead>Date Acquired</TableHead>
                                             <TableHead>Notes</TableHead>
                                             <TableHead>Status</TableHead>
-                                            <TableHead className="text-right">Actions</TableHead>
+                                            <TableHead className="text-right ">Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -294,7 +295,7 @@ export default function InventoryIndex() {
                                                     <TableCell>
                                                         <div className="font-medium">{item.equipment_name}</div>
                                                         <div className="text-xs text-muted-foreground">
-                                                            Serial: {item.serial_number || 'N/A'}
+                                                            Serial: {item.serial_number || 'No serial number'}
                                                         </div>
                                                         {item.office?.office_name && (
                                                             <div className="text-xs text-blue-600 mt-1">
@@ -304,7 +305,7 @@ export default function InventoryIndex() {
                                                         )}
                                                     </TableCell>
                                                     <TableCell>
-                                                        {item.date_acquired || <span className="text-muted-foreground">N/A</span>}
+                                                        {item.date_acquired || <span className="text-muted-foreground">No date</span>}
                                                     </TableCell>
                                                     <TableCell>
                                                         {item.notes || <span className="text-muted-foreground italic">No notes</span>}
@@ -317,12 +318,12 @@ export default function InventoryIndex() {
                                                             {item.remarks === "Non-Functional" ? (
                                                                 <>
                                                                     <Ban className="h-3 w-3" />
-                                                                    Not Working
+                                                                    Non-Functional
                                                                 </>
                                                             ) : (
                                                                 <>
                                                                     <BadgeCheck className="h-3 w-3" />
-                                                                    Working
+                                                                   Functional
                                                                 </>
                                                             )}
                                                         </Badge>
@@ -525,7 +526,6 @@ export default function InventoryIndex() {
                                 <Input
                                     value={form.date_acquired || ""}
                                     onChange={e => setForm({ ...form, date_acquired: e.target.value })}
-                                    required
                                 />
                             </div>
                         </div>

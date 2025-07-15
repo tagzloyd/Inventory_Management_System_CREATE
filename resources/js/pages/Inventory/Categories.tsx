@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Inventory Management', href: '/dashboard' },
@@ -70,6 +71,7 @@ export default function Categories() {
         setOffices(Array.isArray(officesRes.data) ? officesRes.data : officesRes.data?.data || []);
       } catch (err) {
         console.error('Failed to fetch data', err);
+        toast('Failed to fetch data');
       } finally {
         setIsLoading(false);
       }
@@ -84,14 +86,18 @@ export default function Categories() {
       if (editId) {
         if (activeTab === 'categories') {
           await axios.put(`/api/categories/${editId}`, { name });
+          toast('Catergory updated succcessfully!');
         } else {
           await axios.put(`/api/offices/${editId}`, { office_name: officeName });
+          toast('Office updated succcessfully!');
         }
       } else {
         if (activeTab === 'categories') {
           await axios.post('/api/categories', { name });
+          toast('Catergory added succcessfully!');
         } else {
           await axios.post('/api/offices', { office_name: officeName });
+          toast('Office added succcessfully!');
         }
       }
       setName('');
@@ -109,8 +115,10 @@ export default function Categories() {
       try {
         if (activeTab === 'categories') {
           await axios.delete(`/api/categories/${deleteId}`);
+          toast('Category deleted successfully!');
         } else {
           await axios.delete(`/api/offices/${deleteId}`);
+          toast(' deleted successfully!');
         }
         refreshData();
       } catch (err) {
@@ -244,7 +252,7 @@ export default function Categories() {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Inventory Management" />
+      <Head title="Categories and Offices" />
       <div className="p-4 sm:p-6">
         <div className="mb-6">
           <h1 className="text-xl font-semibold mb-1">Categories and Offices Management</h1>
@@ -306,11 +314,11 @@ export default function Categories() {
           </div>
           
           {isLoading ? (
-            <div className="p-8 text-center text-sm text-gray-500">Loading...</div>
+            <div className="p-10 text-center text-sm text-gray-500">Loading...</div>
           ) : (
             <div className="p-1">
               {activeTab === 'categories' ? (
-                <DataTable
+                <DataTable 
                   columns={categoryColumns}
                   data={categories}
                   searchKey="name"

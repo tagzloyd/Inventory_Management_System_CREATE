@@ -10,7 +10,7 @@ CREATE TABLE offices (
 CREATE TABLE inventory (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     equipment_name VARCHAR(255) NOT NULL,
-    serial_number VARCHAR(255) NOT NULL UNIQUE,
+    serial_number VARCHAR(255) NULL,
     date_acquired VARCHAR(255) NULL, -- <-- Add here as string
     notes TEXT NULL,
     remarks VARCHAR(255) DEFAULT 'Functional',
@@ -23,8 +23,8 @@ CREATE TABLE inventory (
         REFERENCES offices(id) ON DELETE SET NULL,
     CONSTRAINT fk_inventory_faculty FOREIGN KEY (faculty_id) 
         REFERENCES faculty(id) ON DELETE SET NULL,
-    CONSTRAINT fk_inventory_category FOREIGN KEY (category_id)
-        REFERENCES category(id) ON DELETE SET NULL    
+    CONSTRAINT fk_inventory_categories FOREIGN KEY (category_id)
+        REFERENCES categories(id) ON DELETE SET NULL    
 
 ) ENGINE=InnoDB;
 
@@ -45,7 +45,7 @@ CREATE TABLE inventory_category (
     updated_at TIMESTAMP NULL,
     PRIMARY KEY (inventory_id, category_id),
     FOREIGN KEY (inventory_id) REFERENCES inventory(id) ON DELETE CASCADE,
-    FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE CASCADE
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- Faculty table (corrected to reference offices)
