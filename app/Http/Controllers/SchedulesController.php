@@ -2,247 +2,196 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Schedule;
+use Illuminate\Http\Request;
 use App\Models\Inventory;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class SchedulesController extends Controller
 {
-    public function __construct()
-    {
-        // Set default timezone for all operations
-        date_default_timezone_set('Asia/Manila');
-    }
-    
     public function index()
     {
-        return Inertia::render('Schedule/index', []);
+        return Inertia::render('schedule/index', [
+            'inventoryItems' => Inventory::select('id', 'equipment_name')->get(),
+        ]);
     }
-    
-    public function fetchSchedules()
+    public function scopeActive($query)
     {
-        try {
-            $schedules = Schedule::with(['inventory' => function($query) {
-                $query->select('id', 'equipment_name');
-            }])
-            ->orderBy('start_time', 'asc')
+        return $query->where('status', '!=', 'Cancelled');
+    }
+    public function getMonthEvents(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'year' => 'required|integer',
+            'month' => 'required|integer|between:1,12',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        $events = Schedule::with('inventory:id,equipment_name')
+            ->whereYear('schedule_date', $request->year)
+            ->whereMonth('schedule_date', $request->month)
             ->get()
-            ->map(function ($schedule) {
-                // Convert times to Asia/Manila timezone for display
-                $schedule->start_time = Carbon::parse($schedule->start_time)->timezone('Asia/Manila');
-                $schedule->end_time = Carbon::parse($schedule->end_time)->timezone('Asia/Manila');
-                return $schedule;
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'title' => $event->name,
+                    'date' => $event->schedule_date->format('Y-m-d'),
+                    'status' => $event->status,
+                    'inventory' => $event->inventory->equipment_name,
+                    'inventory_id' => $event->inventory_id,
+                    'description' => $event->description,
+                ];
             });
-            
-            return response()->json($schedules);
-            
-        } catch (Exception $e) {
-            Log::error('Error fetching schedules: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'Failed to fetch schedules',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-    
-    public function fetchAvailableInventory(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'start_time' => 'required|date',
-                'end_time' => 'required|date|after:start_time',
-            ]);
-            
-            if ($validator->fails()) {
-                return response()->json([
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-            
-            // Parse with Manila timezone
-            $start = Carbon::parse($request->start_time, 'Asia/Manila')->setTimezone('UTC');
-            $end = Carbon::parse($request->end_time, 'Asia/Manila')->setTimezone('UTC');
-            
-            // Get inventory items that are already scheduled during this time
-            $scheduledIds = Schedule::where(function($query) use ($start, $end) {
-                $query->whereBetween('start_time', [$start, $end])
-                      ->orWhereBetween('end_time', [$start, $end])
-                      ->orWhere(function($query) use ($start, $end) {
-                          $query->where('start_time', '<', $start)
-                                ->where('end_time', '>', $end);
-                      });
-            })
+
+        // Get all scheduled inventory IDs for the month
+        $scheduledInventoryIds = Schedule::whereYear('schedule_date', $request->year)
+            ->whereMonth('schedule_date', $request->month)
             ->where('status', '!=', 'Cancelled')
-            ->pluck('inventory_id');
-            
-            // Get available inventory
-            $availableInventory = Inventory::whereNotIn('id', $scheduledIds)
-                ->select('id', 'equipment_name')
-                ->orderBy('equipment_name')
-                ->get();
-                
-            return response()->json($availableInventory);
-            
-        } catch (Exception $e) {
-            Log::error('Error fetching available inventory: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'Failed to fetch available equipment',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+            ->pluck('inventory_id')
+            ->unique()
+            ->values()
+            ->toArray();
+
+        return response()->json([
+            'events' => $events,
+            'scheduledInventoryIds' => $scheduledInventoryIds
+        ]);
     }
-    
+
+    public function getDateEvents(Request $request, $date)
+    {
+        $validator = Validator::make(['date' => $date], [
+            'date' => 'required|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        $events = Schedule::with('inventory:id,equipment_name')
+            ->whereDate('schedule_date', $date)
+            ->get()
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'title' => $event->name,
+                    'date' => $event->schedule_date,
+                    'status' => $event->status,
+                    'inventory' => $event->inventory->equipment_name,
+                    'inventory_id' => $event->inventory_id,
+                    'description' => $event->description,
+                ];
+            });
+
+        return response()->json($events);
+    }
+
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:100',
+            'inventory_id' => 'required|exists:inventory,id',
+            'schedule_date' => 'required|date',
+            'status' => 'sometimes|in:Scheduled,Completed,Cancelled',
+            'description' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        // Check if inventory is already scheduled for this date
+        $existingSchedule = Schedule::where('inventory_id', $request->inventory_id)
+            ->whereDate('schedule_date', $request->schedule_date)
+            ->where('status', '!=', 'Cancelled')
+            ->first();
+
+        if ($existingSchedule) {
+            return response()->json([
+                'error' => 'This equipment is already scheduled for the selected date'
+            ], 422);
+        }
+
         try {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'inventory_id' => 'required|exists:inventory,id',
-                'start_time' => 'required|date',
-                'end_time' => 'required|date|after:start_time',
-                'purpose' => 'required|string|max:500',
-                'status' => 'nullable|string|in:Scheduled,Pending,Completed,Cancelled',
-            ]);
-            
-            if ($validator->fails()) {
-                return response()->json([
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-            
-            // Convert from Manila time to UTC for storage
-            $startTime = Carbon::parse($request->start_time, 'Asia/Manila')->setTimezone('UTC');
-            $endTime = Carbon::parse($request->end_time, 'Asia/Manila')->setTimezone('UTC');
-            
-            // Check for scheduling conflicts
-            $conflict = Schedule::where('inventory_id', $request->inventory_id)
-                ->where('status', '!=', 'Cancelled')
-                ->where(function($query) use ($startTime, $endTime) {
-                    $query->where(function($q) use ($startTime, $endTime) {
-                        $q->where('start_time', '<', $endTime)
-                          ->where('end_time', '>', $startTime);
-                    });
-                })
-                ->exists();
-                
-            if ($conflict) {
-                return response()->json([
-                    'message' => 'This equipment is already scheduled for the selected time period',
-                ], 409);
-            }
-            
             $schedule = Schedule::create([
                 'name' => $request->name,
                 'inventory_id' => $request->inventory_id,
-                'start_time' => $startTime,
-                'end_time' => $endTime,
-                'purpose' => $request->purpose,
+                'schedule_date' => $request->schedule_date,
+                'description' => $request->description,
                 'status' => $request->status ?? 'Scheduled',
             ]);
             
-            // Convert back to Manila time for response
-            $schedule->start_time = $schedule->start_time->timezone('Asia/Manila');
-            $schedule->end_time = $schedule->end_time->timezone('Asia/Manila');
-            
-            return response()->json($schedule->load('inventory'), 201);
-            
-        } catch (Exception $e) {
-            Log::error('Error creating schedule: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Failed to create schedule',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Schedule created successfully',
+                'schedule' => $schedule
+            ], 201);
+        } catch (\Exception $e) {
+            \Log::error('Schedule creation failed:', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Server error'], 500);
         }
     }
-    
-    public function update(Request $request, $id)
+
+    public function show(Schedule $schedule)
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'inventory_id' => 'required|exists:inventory,id',
-                'start_time' => 'required|date',
-                'end_time' => 'required|date|after:start_time',
-                'purpose' => 'required|string|max:500',
-                'status' => 'nullable|string|in:Scheduled,Pending,Completed,Cancelled',
-            ]);
-            
-            if ($validator->fails()) {
+        return response()->json([
+            'id' => $schedule->id,
+            'title' => $schedule->name,
+            'date' => $schedule->schedule_date,
+            'status' => $schedule->status,
+            'inventory' => $schedule->inventory->equipment_name,
+            'inventory_id' => $schedule->inventory_id,
+            'description' => $schedule->description,
+        ]);
+    }
+
+    public function update(Request $request, Schedule $schedule)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string|max:100',
+            'inventory_id' => 'sometimes|required|exists:inventory,id',
+            'schedule_date' => 'sometimes|required|date',
+            'status' => 'sometimes|required|in:Scheduled,Completed,Cancelled',
+            'description' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        // Check if inventory is already scheduled for the new date (if changed)
+        if ($request->has('inventory_id') || $request->has('schedule_date')) {
+            $existingSchedule = Schedule::where('inventory_id', $request->inventory_id ?? $schedule->inventory_id)
+                ->whereDate('schedule_date', $request->schedule_date ?? $schedule->schedule_date)
+                ->where('status', '!=', 'Cancelled')
+                ->where('id', '!=', $schedule->id)
+                ->first();
+
+            if ($existingSchedule) {
                 return response()->json([
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
+                    'error' => 'This equipment is already scheduled for the selected date'
                 ], 422);
             }
-            
-            $schedule = Schedule::findOrFail($id);
-            
-            // Convert from Manila time to UTC for storage
-            $startTime = Carbon::parse($request->start_time, 'Asia/Manila')->setTimezone('UTC');
-            $endTime = Carbon::parse($request->end_time, 'Asia/Manila')->setTimezone('UTC');
-            
-            // Check for scheduling conflicts (excluding current schedule)
-            $conflict = Schedule::where('inventory_id', $request->inventory_id)
-                ->where('id', '!=', $id)
-                ->where('status', '!=', 'Cancelled')
-                ->where(function($query) use ($startTime, $endTime) {
-                    $query->where(function($q) use ($startTime, $endTime) {
-                        $q->where('start_time', '<', $endTime)
-                          ->where('end_time', '>', $startTime);
-                    });
-                })
-                ->exists();
-                
-            if ($conflict) {
-                return response()->json([
-                    'message' => 'This equipment is already scheduled for the selected time period',
-                ], 409);
-            }
-            
-            $schedule->update([
-                'name' => $request->name,
-                'inventory_id' => $request->inventory_id,
-                'start_time' => $startTime,
-                'end_time' => $endTime,
-                'purpose' => $request->purpose,
-                'status' => $request->status ?? $schedule->status,
-            ]);
-            
-            // Convert back to Manila time for response
-            $schedule->start_time = $schedule->start_time->timezone('Asia/Manila');
-            $schedule->end_time = $schedule->end_time->timezone('Asia/Manila');
-            
-            return response()->json($schedule->load('inventory'));
-            
-        } catch (Exception $e) {
-            Log::error('Error updating schedule: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'Failed to update schedule',
-                'error' => $e->getMessage()
-            ], 500);
         }
+
+        $schedule->update($request->all());
+
+        return response()->json([
+            'id' => $schedule->id,
+            'title' => $schedule->name,
+            'date' => $schedule->schedule_date,
+            'status' => $schedule->status,
+            'inventory' => $schedule->inventory->equipment_name,
+            'inventory_id' => $schedule->inventory_id,
+            'description' => $schedule->description,
+        ]);
     }
-    
-    public function destroy($id)
+    public function destroy(Schedule $schedule)
     {
-        try {
-            $schedule = Schedule::findOrFail($id);
-            $schedule->delete();
-            
-            return response()->noContent();
-            
-        } catch (Exception $e) {
-            Log::error('Error deleting schedule: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'Failed to delete schedule',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        $schedule->delete();
+        return response()->json(['message' => 'Schedule deleted successfully']);
     }
 }

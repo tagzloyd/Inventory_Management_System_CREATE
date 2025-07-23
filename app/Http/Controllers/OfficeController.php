@@ -15,9 +15,10 @@ class OfficeController extends Controller
     }
 
     public function fetchOffices()
-    {
-        return Office::withCount('inventories')->get();
-    }
+{
+    $offices = Office::withCount('inventories')->get();
+    return response()->json($offices);
+}
 
     public function store(Request $request)
     {

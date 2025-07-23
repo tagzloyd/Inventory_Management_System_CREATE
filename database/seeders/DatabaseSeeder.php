@@ -16,9 +16,9 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::factory()->create([
-            'name' => 'Admin CREATE',
-            'email' => 'create@carsu.edu.ph',
-            'password' => bcrypt('CREATEAdmin'),
+            'name' => 'Admin',
+            'email' => 'admin@carsu.edu.ph',
+            'password' => bcrypt('Create-Admin'),
         ]);
     }
 }

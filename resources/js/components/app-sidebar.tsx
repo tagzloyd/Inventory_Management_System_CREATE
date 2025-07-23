@@ -74,11 +74,6 @@ const secondaryNavItems: NavGroup[] = [
                 href: '/schedule',
                 icon: CalendarClockIcon,
             },
-            {
-                title: 'Timetable',
-                href: '/timetable',
-                icon: PanelTopCloseIcon,
-            },
         ],
     }
 ];

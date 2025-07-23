@@ -18,9 +18,11 @@ class DashboardController extends Controller
         $totalOffices = Office::count();
         $totalEquipment = Inventory::count();
 
-        // Functional vs Non-Functional
-        $functionalCount = Inventory::where('remarks', '!=', 'Non-Functional')->count();
+        // Equipment status counts
+        $functionalCount = Inventory::where('remarks', 'Functional')->count();
         $nonFunctionalCount = Inventory::where('remarks', 'Non-Functional')->count();
+        $underRepairCount = Inventory::where('remarks', 'Under Repair')->count();
+        $defectiveCount = Inventory::where('remarks', 'Defective')->count();
 
         // Equipment by office
         $equipmentByOffice = Inventory::with('office')
@@ -32,26 +34,18 @@ class DashboardController extends Controller
                 return [$officeName => $item->count];
             });
 
-        // Functional by office
-        $functionalByOffice = Inventory::with('office')
-            ->where('remarks', '!=', 'Non-Functional')
-            ->selectRaw('office_id, count(*) as count')
-            ->groupBy('office_id')
+        // Status by office
+        $statusByOffice = Inventory::with('office')
+            ->selectRaw('office_id, remarks, count(*) as count')
+            ->groupBy('office_id', 'remarks')
             ->get()
-            ->mapWithKeys(function ($item) {
-                $officeName = $item->office ? $item->office->office_name : 'No Office';
-                return [$officeName => $item->count];
-            });
-
-        // Non-functional by office
-        $nonFunctionalByOffice = Inventory::with('office')
-            ->where('remarks', 'Non-Functional')
-            ->selectRaw('office_id, count(*) as count')
-            ->groupBy('office_id')
-            ->get()
-            ->mapWithKeys(function ($item) {
-                $officeName = $item->office ? $item->office->office_name : 'No Office';
-                return [$officeName => $item->count];
+            ->groupBy(function ($item) {
+                return $item->office ? $item->office->office_name : 'No Office';
+            })
+            ->map(function ($officeItems) {
+                return $officeItems->mapWithKeys(function ($item) {
+                    return [$item->remarks => $item->count];
+                });
             });
 
         // Category distribution
@@ -72,32 +66,13 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // Warranty expiring soon (within 90 days)
-        $expiringWarrantyItems = Inventory::whereNotNull('warranty_expiry')
-            ->where('warranty_expiry', '>', now())
-            ->where('warranty_expiry', '<=', now()->addDays(90))
-            ->orderBy('warranty_expiry')
-            ->get();
-
-        // Maintenance items
-        $maintenanceItems = Maintenance::with('inventory')
-            ->orderBy('next_maintenance_date')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'inventory_id' => $item->inventory_id,
-                    'equipment_name' => $item->inventory->equipment_name,
-                    'maintenance_date' => $item->maintenance_date,
-                    'next_maintenance_date' => $item->next_maintenance_date,
-                    'status' => $item->status,
-                    'is_overdue' => $item->status !== 'completed' && 
-                                    Carbon::parse($item->next_maintenance_date)->lt(now())
-                ];
-            });
-
-        // Overdue maintenance
-        $overdueMaintenance = $maintenanceItems->where('is_overdue', true);
+        // Equipment status summary
+        $equipmentStatusSummary = [
+            'Functional' => $functionalCount,
+            'Non-Functional' => $nonFunctionalCount,
+            'Under Repair' => $underRepairCount,
+            'Defective' => $defectiveCount,
+        ];
 
         return Inertia::render('Dashboard', [
             'totalCategory' => $totalCategory,
@@ -105,13 +80,12 @@ class DashboardController extends Controller
             'totalEquipment' => $totalEquipment,
             'functionalCount' => $functionalCount,
             'nonFunctionalCount' => $nonFunctionalCount,
-            'functionalByOffice' => $functionalByOffice,
-            'nonFunctionalByOffice' => $nonFunctionalByOffice,
+            'underRepairCount' => $underRepairCount,
+            'defectiveCount' => $defectiveCount,
+            'equipmentStatusSummary' => $equipmentStatusSummary,
+            'statusByOffice' => $statusByOffice,
             'categoryDistribution' => $categoryDistribution,
             'recentEquipment' => $recentEquipment,
-            'expiringWarrantyItems' => $expiringWarrantyItems,
-            'maintenanceItems' => $maintenanceItems,
-            'overdueMaintenance' => $overdueMaintenance,
         ]);
     }
 }

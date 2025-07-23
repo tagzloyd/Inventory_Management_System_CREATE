@@ -6,7 +6,7 @@ import { Head } from '@inertiajs/react';
 import { ColumnDef } from "@tanstack/react-table";
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Building2, FolderKanban, ArrowUpDown, Pencil, Trash2 } from "lucide-react";
+import { Building2, FolderKanban, ArrowUpDown, Pencil, Trash2, Plus, Loader2, MoreHorizontal } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import {
   Dialog,
@@ -27,6 +27,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Inventory Management', href: '/dashboard' },
@@ -57,6 +66,7 @@ export default function Categories() {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<'categories' | 'offices'>('categories');
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,7 +81,9 @@ export default function Categories() {
         setOffices(Array.isArray(officesRes.data) ? officesRes.data : officesRes.data?.data || []);
       } catch (err) {
         console.error('Failed to fetch data', err);
-        toast('Failed to fetch data');
+        toast.error('Failed to fetch data', {
+          description: 'Please try again later',
+        });
       } finally {
         setIsLoading(false);
       }
@@ -82,22 +94,23 @@ export default function Categories() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       if (editId) {
         if (activeTab === 'categories') {
           await axios.put(`/api/categories/${editId}`, { name });
-          toast('Catergory updated succcessfully!');
+          toast.success('Category updated successfully!');
         } else {
           await axios.put(`/api/offices/${editId}`, { office_name: officeName });
-          toast('Office updated succcessfully!');
+          toast.success('Office updated successfully!');
         }
       } else {
         if (activeTab === 'categories') {
           await axios.post('/api/categories', { name });
-          toast('Catergory added succcessfully!');
+          toast.success('Category added successfully!');
         } else {
           await axios.post('/api/offices', { office_name: officeName });
-          toast('Office added succcessfully!');
+          toast.success('Office added successfully!');
         }
       }
       setName('');
@@ -107,25 +120,36 @@ export default function Categories() {
       refreshData();
     } catch (err) {
       console.error(err);
+      toast.error('An error occurred', {
+        description: 'Please check your input and try again',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = async () => {
     if (deleteId !== null) {
+      setIsSubmitting(true);
       try {
         if (activeTab === 'categories') {
           await axios.delete(`/api/categories/${deleteId}`);
-          toast('Category deleted successfully!');
+          toast.success('Category deleted successfully!');
         } else {
           await axios.delete(`/api/offices/${deleteId}`);
-          toast(' deleted successfully!');
+          toast.success('Office deleted successfully!');
         }
         refreshData();
       } catch (err) {
         console.error(err);
+        toast.error('Failed to delete', {
+          description: 'This item might be in use and cannot be deleted',
+        });
+      } finally {
+        setIsSubmitting(false);
+        setDeleteId(null);
+        setIsDeleteDialogOpen(false);
       }
-      setDeleteId(null);
-      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -141,6 +165,7 @@ export default function Categories() {
       }
     } catch (err) {
       console.error('Failed to refresh data', err);
+      toast.error('Failed to refresh data');
     } finally {
       setIsLoading(false);
     }
@@ -149,49 +174,74 @@ export default function Categories() {
   const categoryColumns: ColumnDef<Category>[] = [
     {
       accessorKey: "name",
-      header: "Category Name",
-      cell: ({ row }) => <span className="text-sm">{row.getValue("name")}</span>
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="px-0 hover:bg-transparent"
+          >
+            Category Name
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
+      cell: ({ row }) => (
+        <div className="flex items-center gap-3">
+          <div className="bg-green-50 p-2 rounded-lg">
+            <FolderKanban className="w-4 h-4 text-green-600" />
+          </div>
+          <span className="font-medium">{row.getValue("name")}</span>
+        </div>
+      )
     },
     {
       accessorKey: "inventories_count",
       header: "Items",
       cell: ({ row }) => (
-        <span className=" text-sm text-left block">
-          {row.getValue("inventories_count")}
-        </span>
+        <Badge variant="outline" className="text-sm">
+          {row.getValue("inventories_count")} items
+        </Badge>
       ),
     },
     {
       id: "actions",
-      header: "Action",
+      header: "",
       cell: ({ row }) => {
         const category = row.original;
         return (
-          <div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 px-2"
-              onClick={() => {
-                setEditId(category.id);
-                setName(category.name);
-                setIsEditing(true);
-                setIsModalOpen(true);
-              }}
-            >
-              <Pencil className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              className="h-8 px-2"
-              onClick={() => {
-                setDeleteId(category.id);
-                setIsDeleteDialogOpen(true);
-              }}
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setEditId(category.id);
+                    setName(category.name);
+                    setIsEditing(true);
+                    setIsModalOpen(true);
+                  }}
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  <span>Edit</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                  onClick={() => {
+                    setDeleteId(category.id);
+                    setIsDeleteDialogOpen(true);
+                  }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>Delete</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )
       },
@@ -201,49 +251,65 @@ export default function Categories() {
   const officeColumns: ColumnDef<Office>[] = [
     {
       accessorKey: "office_name",
-      header: "Office Name",
-      cell: ({ row }) => <span className="text-sm">{row.getValue("office_name")}</span>
-    },
-    {
-      accessorKey: "inventories_count",
-      header: "Items",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="px-0 hover:bg-transparent"
+          >
+            Office Name
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
       cell: ({ row }) => (
-        <span>
-          {row.getValue("inventories_count")}
-        </span>
-      ),
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-50 p-2 rounded-lg">
+            <Building2 className="w-4 h-4 text-blue-600" />
+          </div>
+          <span className="font-medium">{row.getValue("office_name")}</span>
+        </div>
+      )
     },
     {
       id: "actions",
-      header: "Action",
+      header: "",
       cell: ({ row }) => {
         const office = row.original;
         return (
-          <div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 px-2"
-              onClick={() => {
-                setEditId(office.id);
-                setOfficeName(office.office_name);
-                setIsEditing(true);
-                setIsModalOpen(true);
-              }}
-            >
-              <Pencil className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              className="h-8 px-2"
-              onClick={() => {
-                setDeleteId(office.id);
-                setIsDeleteDialogOpen(true);
-              }}
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setEditId(office.id);
+                    setOfficeName(office.office_name);
+                    setIsEditing(true);
+                    setIsModalOpen(true);
+                  }}
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  <span>Edit</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                  onClick={() => {
+                    setDeleteId(office.id);
+                    setIsDeleteDialogOpen(true);
+                  }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>Delete</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )
       },
@@ -253,102 +319,175 @@ export default function Categories() {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Categories and Offices" />
-      <div className="p-4 sm:p-6">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold mb-1">Categories and Offices Management</h1>
-          <p className="text-sm text-gray-600">
-            Manage your inventory categories and office locations
-          </p>
+      <div className="p-4 sm:p-6 space-y-6">
+        <div className="space-y-1">
+          <div>
+                <CardTitle className="text-2xl font-semibold tracking-tight">Categories and Offices Management</CardTitle>
+                <CardDescription className="mt-1">
+                  Manage your inventory categories and office locations
+                </CardDescription>
+              </div>
         </div>
         
-        <div className="mb-4">
-          <Tabs 
-            value={activeTab} 
-            onValueChange={(value) => setActiveTab(value as 'categories' | 'offices')}
-            className="w-full sm:w-auto"
-          >
-            <TabsList className="grid w-full grid-cols-8">
-              <TabsTrigger value="categories" className="text-sm py-1">
-                <FolderKanban className="w-3 h-3 mr-2" />
-                Categories
-              </TabsTrigger>
-              <TabsTrigger value="offices" className="text-sm py-1">
-                <Building2 className="w-3 h-3 mr-2" />
-                Offices
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+        <Tabs 
+          value={activeTab} 
+          onValueChange={(value) => setActiveTab(value as 'categories' | 'offices')}
+          className="w-full"
+        >
+          <TabsList className="grid w-full grid-cols-2 max-w-xs">
+            <TabsTrigger value="categories" className="gap-2">
+              <FolderKanban className="w-4 h-4" />
+              Categories
+            </TabsTrigger>
+            <TabsTrigger value="offices" className="gap-2">
+              <Building2 className="w-4 h-4" />
+              Offices
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
-        <div className="bg-white rounded-lg border">
-          <div className="p-4 border-b flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className={`rounded-full p-2 ${
-                activeTab === 'categories' 
-                  ? 'bg-green-50 text-green-600' 
-                  : 'bg-blue-50 text-blue-600'
-              }`}>
-                {activeTab === 'categories' ? (
-                  <FolderKanban className="w-4 h-4" />
-                ) : (
-                  <Building2 className="w-4 h-4" />
-                )}
-              </span>
-              <h2 className="text-sm font-medium">
-                {activeTab === 'categories' ? 'Equipment Categories' : 'Office Locations'}
-              </h2>
+        <Card>
+          <CardHeader className="border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className={`rounded-lg p-3 ${
+                  activeTab === 'categories' 
+                    ? 'bg-green-50 text-green-600' 
+                    : 'bg-blue-50 text-blue-600'
+                }`}>
+                  {activeTab === 'categories' ? (
+                    <FolderKanban className="w-5 h-5" />
+                  ) : (
+                    <Building2 className="w-5 h-5" />
+                  )}
+                </div>
+                <div>
+                  <CardTitle className="text-lg">
+                    {activeTab === 'categories' ? 'Equipment Categories' : 'Office Locations'}
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    {activeTab === 'categories' 
+                      ? 'Manage your inventory categories' 
+                      : 'Manage office locations for inventory assignment'}
+                  </CardDescription>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                className="gap-1"
+                onClick={() => {
+                  setName('');
+                  setOfficeName('');
+                  setEditId(null);
+                  setIsEditing(false);
+                  setIsModalOpen(true);
+                }}
+              >
+                <Plus className="w-4 h-4" />
+                Add {activeTab === 'categories' ? 'Category' : 'Office'}
+              </Button>
             </div>
-            <Button
-              size="sm"
-              className="h-8 text-sm"
-              onClick={() => {
-                setName('');
-                setOfficeName('');
-                setEditId(null);
-                setIsEditing(false);
-                setIsModalOpen(true);
-              }}
-            >
-              + Add {activeTab === 'categories' ? 'Category' : 'Office'}
-            </Button>
-          </div>
+          </CardHeader>
           
-          {isLoading ? (
-            <div className="p-10 text-center text-sm text-gray-500">Loading...</div>
-          ) : (
-            <div className="p-1">
-              {activeTab === 'categories' ? (
-                <DataTable 
-                  columns={categoryColumns}
-                  data={categories}
-                  searchKey="name"
-                />
-              ) : (
-                <DataTable
-                  columns={officeColumns}
-                  data={offices}
-                  searchKey="office_name"
-                />
-              )}
-            </div>
-          )}
-        </div>
+          <CardContent className="p-0">
+            {isLoading ? (
+              <div className="p-6 space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            ) : (
+              <div className="p-2">
+                {activeTab === 'categories' ? (
+                  <DataTable 
+                    columns={categoryColumns}
+                    data={categories}
+                    searchKey="name"
+                    emptyState={
+                      <div className="p-6 text-center">
+                        <FolderKanban className="mx-auto h-10 w-10 text-gray-400" />
+                        <h3 className="mt-2 text-sm font-medium">No categories found</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Get started by adding a new category
+                        </p>
+                        <Button
+                          size="sm"
+                          className="mt-4"
+                          onClick={() => {
+                            setName('');
+                            setEditId(null);
+                            setIsEditing(false);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          Add Category
+                        </Button>
+                      </div>
+                    }
+                  />
+                ) : (
+                  <DataTable
+                    columns={officeColumns}
+                    data={offices}
+                    searchKey="office_name"
+                    emptyState={
+                      <div className="p-6 text-center">
+                        <Building2 className="mx-auto h-10 w-10 text-gray-400" />
+                        <h3 className="mt-2 text-sm font-medium">No offices found</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Get started by adding a new office
+                        </p>
+                        <Button
+                          size="sm"
+                          className="mt-4"
+                          onClick={() => {
+                            setOfficeName('');
+                            setEditId(null);
+                            setIsEditing(false);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          Add Office
+                        </Button>
+                      </div>
+                    }
+                  />
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Combined Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-base">
-              {isEditing 
-                ? `Edit ${activeTab === 'categories' ? 'Category' : 'Office'}` 
-                : `Add ${activeTab === 'categories' ? 'Category' : 'Office'}`}
-            </DialogTitle>
+            <div className="flex items-center gap-3">
+              <div className={`rounded-lg p-2 ${
+                activeTab === 'categories' 
+                  ? 'bg-green-50 text-green-600' 
+                  : 'bg-blue-50 text-blue-600'
+              }`}>
+                {activeTab === 'categories' ? (
+                  <FolderKanban className="w-5 h-5" />
+                ) : (
+                  <Building2 className="w-5 h-5" />
+                )}
+              </div>
+              <DialogTitle className="text-lg">
+                {isEditing 
+                  ? `Edit ${activeTab === 'categories' ? 'Category' : 'Office'}` 
+                  : `Add ${activeTab === 'categories' ? 'Category' : 'Office'}`}
+              </DialogTitle>
+            </div>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <label htmlFor="name" className="text-sm text-gray-600">
+                <label htmlFor="name" className="text-sm font-medium leading-none">
                   {activeTab === 'categories' ? 'Category Name' : 'Office Name'}
                 </label>
                 <Input
@@ -366,7 +505,18 @@ export default function Categories() {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" className="text-sm">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isEditing ? 'Save Changes' : 'Add'} {activeTab === 'categories' ? 'Category' : 'Office'}
               </Button>
             </DialogFooter>
@@ -378,20 +528,27 @@ export default function Categories() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent className="sm:max-w-[425px]">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-base">
-              Confirm Deletion
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm">
+            <div className="flex items-center gap-3">
+              <div className="bg-red-50 p-2 rounded-lg">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <AlertDialogTitle className="text-lg">
+                Confirm Deletion
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-sm mt-2">
               Are you sure you want to delete this {activeTab === 'categories' ? 'category' : 'office'}? 
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="text-sm">Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDelete} 
-              className="text-sm bg-destructive hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90"
+              disabled={isSubmitting}
             >
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

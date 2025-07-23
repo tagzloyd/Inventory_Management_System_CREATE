@@ -6,7 +6,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import axios from "axios";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Pencil, Trash2, Plus, ChevronDown, ChevronUp, Loader2, Mail, Phone, Building2, Package2, Check, Ban } from "lucide-react";
+import { Pencil, Trash2, Plus, ChevronDown, ChevronUp, Loader2, Mail, Phone, Building2, Package2, Check, Ban, User, Search, AlertCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Inventory Management', href: '/dashboard' },
@@ -51,6 +52,7 @@ export default function FacultyIndex() {
     const [loading, setLoading] = useState(true);
     const [expandedFaculty, setExpandedFaculty] = useState<number | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
     
     const fetchFaculties = async () => {
         try {
@@ -58,7 +60,9 @@ export default function FacultyIndex() {
             const res = await axios.get('/api/faculties');
             setFaculties(res.data);
         } catch (err) {
-            toast("Failed to load faculties");
+            toast.error("Failed to load faculties", {
+                description: "Please try again later",
+            });
         } finally {
             setLoading(false);
         }
@@ -69,7 +73,9 @@ export default function FacultyIndex() {
             const res = await axios.get('/api/offices');
             setOffices(res.data);
         } catch (err) {
-            toast("Failed to load offices");
+            toast.error("Failed to load offices", {
+                description: "Office data might be incomplete",
+            });
         }
     };
 
@@ -80,20 +86,29 @@ export default function FacultyIndex() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsSubmitting(true);
         try {
             if (editId) {
                 await axios.put(`/api/faculties/${editId}`, form);
-                toast("Faculty updated successfully!");
+                toast.success("Faculty updated successfully!", {
+                    description: `${form.name}'s details have been updated.`,
+                });
             } else {
                 await axios.post('/api/faculties/store', form);
-                toast("Faculty added successfully!");
+                toast.success("Faculty added successfully!", {
+                    description: `${form.name} has been added to the system.`,
+                });
             }
             setForm({});
             setEditId(null);
             setShowModal(false);
             fetchFaculties();
         } catch (err) {
-            toast.error("Failed to save faculty. Please check your data.");
+            toast.error("Failed to save faculty", {
+                description: "Please check your data and try again.",
+            });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -110,14 +125,22 @@ export default function FacultyIndex() {
 
     const confirmDelete = async () => {
         if (deleteId !== null) {
+            setIsSubmitting(true);
             try {
+                const faculty = faculties.find(f => f.id === deleteId);
                 await axios.delete(`/api/faculties/${deleteId}`);
-                toast.success("Faculty deleted successfully!");
+                toast.success("Faculty deleted successfully!", {
+                    description: `${faculty?.name} has been removed from the system.`,
+                });
                 fetchFaculties();
             } catch (err) {
-                toast.error("Failed to delete faculty.");
+                toast.error("Failed to delete faculty", {
+                    description: "This faculty might have assigned equipment.",
+                });
+            } finally {
+                setIsSubmitting(false);
+                setDeleteId(null);
             }
-            setDeleteId(null);
         }
     };
 
@@ -137,28 +160,49 @@ export default function FacultyIndex() {
             <Head title="Faculty Management" />
             <Toaster richColors position="top-right" />
             
-           <div className="space-y-2.5">
+            <div className="space-y-6 m-6 " >
+                <div className="space-y-1">
+                    <div>
+                        <CardTitle className="text-2xl font-semibold tracking-tight">Faculty Management</CardTitle>
+                        <CardDescription className="mt-1">
+                        Maintain a directory of faculty members who can access and use inventory items.
+                        </CardDescription>
+                    </div>
+                </div>
+
                 <Card>
-                    <CardHeader>
-                         <CardTitle>Faculty Management</CardTitle>
-                                <CardDescription>
-                                    Maintain a directory of faculty members who can access and use inventory items.
-                                </CardDescription>
-                    </CardHeader>
-                    <CardContent>
+                    <CardHeader className="border-b">
                         <div className="flex flex-col sm:flex-row justify-between gap-4">
-                        <div></div> 
+                            <div className="relative w-full sm:w-64">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search faculty..."
+                                    className="pl-9"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
                             <Button 
                                 onClick={() => { setShowModal(true); setEditId(null); setForm({}); }}
                                 className="gap-2"
                             >
-                                <Plus className="h-4 w-4" /> Add Faculty
+                                <Plus className="h-4 w-4" /> 
+                                Add Faculty
                             </Button>
                         </div>
-                        <br />
+                    </CardHeader>
+                    <CardContent className="p-0">
                         {loading ? (
-                            <div className="flex justify-center items-center h-64">
-                                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                            <div className="p-6 space-y-4">
+                                {[...Array(5)].map((_, i) => (
+                                    <div key={i} className="flex items-center space-x-4">
+                                        <Skeleton className="h-12 w-12 rounded-full" />
+                                        <div className="space-y-2 flex-1">
+                                            <Skeleton className="h-4 w-[200px]" />
+                                            <Skeleton className="h-4 w-[150px]" />
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         ) : (
                             <div className="rounded-md border">
@@ -175,9 +219,12 @@ export default function FacultyIndex() {
                                         {filteredFaculties.length === 0 ? (
                                             <TableRow>
                                                 <TableCell colSpan={4} className="text-center h-64">
-                                                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                                                        <Package2 className="h-8 w-8" />
-                                                        <p>No faculty members found</p>
+                                                    <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                                                        <User className="h-10 w-10" />
+                                                        <div className="space-y-1">
+                                                            <p className="font-medium">No faculty members found</p>
+                                                            <p className="text-sm">Try adjusting your search or add a new faculty member</p>
+                                                        </div>
                                                         <Button 
                                                             variant="outline"
                                                             onClick={() => { 
@@ -185,8 +232,9 @@ export default function FacultyIndex() {
                                                                 setEditId(null); 
                                                                 setForm({}); 
                                                             }}
+                                                            className="gap-2"
                                                         >
-                                                            <Plus className="h-4 w-4 mr-2" />
+                                                            <Plus className="h-4 w-4" />
                                                             Add New Faculty
                                                         </Button>
                                                     </div>
@@ -195,14 +243,21 @@ export default function FacultyIndex() {
                                         ) : (
                                             filteredFaculties.map(faculty => (
                                                 <>
-                                                    <TableRow key={faculty.id} className="hover:bg-muted/50">
+                                                    <TableRow key={`${faculty.id}-main`} className="hover:bg-muted/50">
                                                         <TableCell>
-                                                            <div className="font-medium">{faculty.name}</div>
-                                                            {faculty.inventory && faculty.inventory.length > 0 && (
-                                                                <div className="text-xs text-muted-foreground mt-1">
-                                                                    {faculty.inventory.length} assigned equipment
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="bg-blue-50 p-2 rounded-lg">
+                                                                    <User className="h-5 w-5 text-blue-600" />
                                                                 </div>
-                                                            )}
+                                                                <div>
+                                                                    <div className="font-medium">{faculty.name}</div>
+                                                                    {faculty.inventory && faculty.inventory.length > 0 && (
+                                                                        <div className="text-xs text-muted-foreground mt-1">
+                                                                            {faculty.inventory.length} assigned equipment
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
                                                         </TableCell>
                                                         <TableCell>
                                                             <div className="flex items-center gap-2">
@@ -271,7 +326,7 @@ export default function FacultyIndex() {
                                                         </TableCell>
                                                     </TableRow>
                                                     {expandedFaculty === faculty.id && (
-                                                        <TableRow>
+                                                        <TableRow key={`${faculty.id}-expanded`}>
                                                             <TableCell colSpan={4} className="p-0 bg-muted/10">
                                                                 <div className="p-4">
                                                                     <div className="space-y-4">
@@ -295,17 +350,29 @@ export default function FacultyIndex() {
                                                                                             {item.date_acquired ? new Date(item.date_acquired).toLocaleDateString() : 'N/A'}
                                                                                         </div>
                                                                                         <div className="col-span-2">
-                                                                                            <Badge 
-                                                                                                variant={item.remarks === "Non-Functional" ? "destructive" : "default"}
+                                                                                            <Badge
+                                                                                                variant={
+                                                                                                    item.remarks === "Non-Functional" 
+                                                                                                    ? "destructive" 
+                                                                                                    : item.remarks === "Under Repair"
+                                                                                                        ? "outline"
+                                                                                                        : item.remarks === "Defective"
+                                                                                                        ? "destructive"
+                                                                                                        : "default"
+                                                                                                }
                                                                                                 className="gap-1"
-                                                                                            >
+                                                                                                >
                                                                                                 {item.remarks === "Non-Functional" ? (
                                                                                                     <Ban className="h-3 w-3" />
+                                                                                                ) : item.remarks === "Under Repair" ? (
+                                                                                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                                                                                ) : item.remarks === "Defective" ? (
+                                                                                                    <AlertCircle className="h-3 w-3" />
                                                                                                 ) : (
                                                                                                     <Check className="h-3 w-3" />
                                                                                                 )}
                                                                                                 {item.remarks || "Functional"}
-                                                                                            </Badge>
+                                                                                                </Badge>
                                                                                         </div>
                                                                                     </div>
                                                                                 ))}
@@ -336,22 +403,23 @@ export default function FacultyIndex() {
             <Dialog open={showModal} onOpenChange={setShowModal}>
                 <DialogContent className="sm:max-w-[525px]">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            {editId ? (
-                                <>
-                                    <Pencil className="h-5 w-5" />
-                                    Edit Faculty
-                                </>
-                            ) : (
-                                <>
-                                    <Plus className="h-5 w-5" />
-                                    Add Faculty
-                                </>
-                            )}
-                        </DialogTitle>
-                        <DialogDescription>
-                            {editId ? "Update faculty details below" : "Enter details for new faculty member"}
-                        </DialogDescription>
+                        <div className="flex items-center gap-3">
+                            <div className="bg-blue-50 p-2 rounded-lg">
+                                {editId ? (
+                                    <Pencil className="h-5 w-5 text-blue-600" />
+                                ) : (
+                                    <Plus className="h-5 w-5 text-blue-600" />
+                                )}
+                            </div>
+                            <div>
+                                <DialogTitle>
+                                    {editId ? "Edit Faculty" : "Add Faculty"}
+                                </DialogTitle>
+                                <DialogDescription>
+                                    {editId ? "Update faculty details below" : "Enter details for new faculty member"}
+                                </DialogDescription>
+                            </div>
+                        </div>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
@@ -416,7 +484,8 @@ export default function FacultyIndex() {
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit">
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {editId ? "Save Changes" : "Add Faculty"}
                             </Button>
                         </DialogFooter>
@@ -428,13 +497,17 @@ export default function FacultyIndex() {
             <Dialog open={deleteId !== null} onOpenChange={open => !open && setDeleteId(null)}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-destructive">
-                            <Trash2 className="h-5 w-5" />
-                            Confirm Deletion
-                        </DialogTitle>
-                        <DialogDescription>
-                            This will permanently remove the faculty member and cannot be undone.
-                        </DialogDescription>
+                        <div className="flex items-center gap-3">
+                            <div className="bg-red-50 p-2 rounded-lg">
+                                <Trash2 className="h-5 w-5 text-red-600" />
+                            </div>
+                            <div>
+                                <DialogTitle>Confirm Deletion</DialogTitle>
+                                <DialogDescription>
+                                    This will permanently remove the faculty member and cannot be undone.
+                                </DialogDescription>
+                            </div>
+                        </div>
                     </DialogHeader>
                     <DialogFooter>
                         <Button 
@@ -446,7 +519,9 @@ export default function FacultyIndex() {
                         <Button 
                             variant="destructive"
                             onClick={confirmDelete}
+                            disabled={isSubmitting}
                         >
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Delete Faculty
                         </Button>
                     </DialogFooter>
