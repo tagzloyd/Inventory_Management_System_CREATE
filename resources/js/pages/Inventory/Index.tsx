@@ -590,14 +590,14 @@ export default function InventoryIndex() {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Office *</label>
+                <label className="text-sm font-medium leading-none">Location *</label>
                 <Select
                   value={form.office_id?.toString() || ""}
                   onValueChange={value => setForm({ ...form, office_id: Number(value) })}
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select office" />
+                    <SelectValue placeholder="Select location" />
                   </SelectTrigger>
                   <SelectContent>
                     <ScrollArea className="h-60">
