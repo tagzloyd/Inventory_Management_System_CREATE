@@ -113,6 +113,8 @@ export default function FacultyIndex() {
     };
 
     const handleEdit = (faculty: Faculty) => {
+        if (faculty.name.includes("Others")) return;
+        
         setEditId(faculty.id);
         setForm({
             name: faculty.name,
@@ -125,9 +127,11 @@ export default function FacultyIndex() {
 
     const confirmDelete = async () => {
         if (deleteId !== null) {
+            const faculty = faculties.find(f => f.id === deleteId);
+            if (faculty?.name.includes("Others")) return;
+            
             setIsSubmitting(true);
             try {
-                const faculty = faculties.find(f => f.id === deleteId);
                 await axios.delete(`/api/faculties/${deleteId}`);
                 toast.success("Faculty deleted successfully!", {
                     description: `${faculty?.name} has been removed from the system.`,
@@ -150,9 +154,9 @@ export default function FacultyIndex() {
 
     const filteredFaculties = faculties.filter(faculty =>
         faculty.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        faculty.office?.office_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        faculty.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        faculty.phone?.toLowerCase().includes(searchTerm.toLowerCase())
+        (faculty.office?.office_name && !faculty.name.includes("Others") && faculty.office.office_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (faculty.email && !faculty.name.includes("Others") && faculty.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (faculty.phone && !faculty.name.includes("Others") && faculty.phone.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     return (
@@ -246,11 +250,28 @@ export default function FacultyIndex() {
                                                     <TableRow key={`${faculty.id}-main`} className="hover:bg-muted/50">
                                                         <TableCell>
                                                             <div className="flex items-center gap-3">
-                                                                <div className="bg-blue-50 p-2 rounded-lg">
-                                                                    <User className="h-5 w-5 text-blue-600" />
+                                                                <div className={cn(
+                                                                    "p-2 rounded-lg",
+                                                                    faculty.name.includes("Others") 
+                                                                        ? "bg-gray-100" 
+                                                                        : "bg-blue-50"
+                                                                )}>
+                                                                    <User className={cn(
+                                                                        "h-5 w-5",
+                                                                        faculty.name.includes("Others") 
+                                                                            ? "text-gray-600" 
+                                                                            : "text-blue-600"
+                                                                    )} />
                                                                 </div>
                                                                 <div>
-                                                                    <div className="font-medium">{faculty.name}</div>
+                                                                    <div className="font-medium">
+                                                                        {faculty.name}
+                                                                        {faculty.name.includes("Others") && (
+                                                                            <span className="ml-2 text-xs text-muted-foreground">
+                                                                                (Unassigned Equipment)
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
                                                                     {faculty.inventory && faculty.inventory.length > 0 && (
                                                                         <div className="text-xs text-muted-foreground mt-1">
                                                                             {faculty.inventory.length} assigned equipment
@@ -260,36 +281,44 @@ export default function FacultyIndex() {
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>
-                                                            <div className="flex items-center gap-2">
-                                                                <Building2 className="h-4 w-4 text-muted-foreground" />
-                                                                <span>{faculty.office?.office_name || 'Not assigned'}</span>
-                                                            </div>
+                                                            {faculty.name.includes("Others") ? (
+                                                                <div className="text-muted-foreground">No official office</div>
+                                                            ) : (
+                                                                <div className="flex items-center gap-2">
+                                                                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                                                                    <span>{faculty.office?.office_name || 'Not assigned'}</span>
+                                                                </div>
+                                                            )}
                                                         </TableCell>
                                                         <TableCell>
-                                                            <div className="flex flex-col gap-1">
-                                                                {faculty.email ? (
-                                                                    <a 
-                                                                        href={`mailto:${faculty.email}`}
-                                                                        className="flex items-center gap-2 hover:text-primary hover:underline"
-                                                                    >
-                                                                        <Mail className="h-4 w-4 text-muted-foreground" />
-                                                                        {faculty.email}
-                                                                    </a>
-                                                                ) : (
-                                                                    <div className="text-muted-foreground">No email</div>
-                                                                )}
-                                                                {faculty.phone ? (
-                                                                    <a 
-                                                                        href={`tel:${faculty.phone}`}
-                                                                        className="flex items-center gap-2 hover:text-primary hover:underline"
-                                                                    >
-                                                                        <Phone className="h-4 w-4 text-muted-foreground" />
-                                                                        {faculty.phone}
-                                                                    </a>
-                                                                ) : (
-                                                                    <div className="text-muted-foreground">No phone</div>
-                                                                )}
-                                                            </div>
+                                                            {faculty.name.includes("Others") ? (
+                                                                <div className="text-muted-foreground">N/A</div>
+                                                            ) : (
+                                                                <div className="flex flex-col gap-1">
+                                                                    {faculty.email ? (
+                                                                        <a 
+                                                                            href={`mailto:${faculty.email}`}
+                                                                            className="flex items-center gap-2 hover:text-primary hover:underline"
+                                                                        >
+                                                                            <Mail className="h-4 w-4 text-muted-foreground" />
+                                                                            {faculty.email}
+                                                                        </a>
+                                                                    ) : (
+                                                                        <div className="text-muted-foreground">No email</div>
+                                                                    )}
+                                                                    {faculty.phone ? (
+                                                                        <a 
+                                                                            href={`tel:${faculty.phone}`}
+                                                                            className="flex items-center gap-2 hover:text-primary hover:underline"
+                                                                        >
+                                                                            <Phone className="h-4 w-4 text-muted-foreground" />
+                                                                            {faculty.phone}
+                                                                        </a>
+                                                                    ) : (
+                                                                        <div className="text-muted-foreground">No phone</div>
+                                                                    )}
+                                                                </div>
+                                                            )}
                                                         </TableCell>
                                                         <TableCell className="text-right space-x-1">
                                                             <Button
@@ -305,24 +334,28 @@ export default function FacultyIndex() {
                                                                     <ChevronDown className="h-4 w-4" />
                                                                 )}
                                                             </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => handleEdit(faculty)}
-                                                                className="h-8 w-8 p-0"
-                                                                title="Edit"
-                                                            >
-                                                                <Pencil className="h-4 w-4" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => setDeleteId(faculty.id)}
-                                                                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                                                                title="Delete"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
+                                                            {!faculty.name.includes("Others") && (
+                                                                <>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => handleEdit(faculty)}
+                                                                        className="h-8 w-8 p-0"
+                                                                        title="Edit"
+                                                                    >
+                                                                        <Pencil className="h-4 w-4" />
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => setDeleteId(faculty.id)}
+                                                                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                                                        title="Delete"
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                </>
+                                                            )}
                                                         </TableCell>
                                                     </TableRow>
                                                     {expandedFaculty === faculty.id && (

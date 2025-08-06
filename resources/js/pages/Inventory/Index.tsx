@@ -354,9 +354,13 @@ export default function InventoryIndex() {
                                 </>
                               )}
                               {item.faculty?.name && (
-                                <span className="text-muted-foreground text-sm">
-                                  ({item.faculty.name})
-                                </span>
+                                  <span className="text-muted-foreground text-sm">
+                                      {item.faculty.name.includes("Others") ? (
+                                          "(Unassigned Equipment)"
+                                      ) : (
+                                          `(${item.faculty.name})`
+                                      )}
+                                  </span>
                               )}
                               {!item.office?.office_name && !item.faculty?.name && (
                                 <span className="text-muted-foreground text-sm">Unassigned</span>
