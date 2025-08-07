@@ -15,8 +15,8 @@ class DatabaseSeeder extends Seeder
     {
         // All factory calls are commented out or removed for production safety
 
-        // Disable foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        // Disable foreign key checks (MySQL only) - REMOVE or COMMENT OUT for PostgreSQL
+        // DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
         // Clear existing data
         DB::table('categories')->truncate();
@@ -185,8 +185,8 @@ class DatabaseSeeder extends Seeder
         ];
         DB::table('schedules')->insert($schedules);
 
-        // Enable foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        // Enable foreign key checks (MySQL only) - REMOVE or COMMENT OUT for PostgreSQL
+        // DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         $this->command->info('Database seeded successfully!');
     }
 }
