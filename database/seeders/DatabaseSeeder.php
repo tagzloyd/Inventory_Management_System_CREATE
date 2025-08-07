@@ -17,11 +17,13 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => env('ADMIN_EMAIL'),
-            'password' => bcrypt(env('ADMIN_PASSWORD')),
-        ]);
+        // User::factory()->create([
+        //     'name' => 'Admin',
+        //     'email' => env('ADMIN_EMAIL'),
+        //     'password' => bcrypt(env('ADMIN_PASSWORD')),
+        // ]);
+
+        
         // Disable foreign key checks
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
