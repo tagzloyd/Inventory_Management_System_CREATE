@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-// use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -15,15 +13,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // All factory calls are commented out or removed for production safety
 
-        // User::factory()->create([
-        //     'name' => 'Admin',
-        //     'email' => env('ADMIN_EMAIL'),
-        //     'password' => bcrypt(env('ADMIN_PASSWORD')),
-        // ]);
-
-        
         // Disable foreign key checks
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
