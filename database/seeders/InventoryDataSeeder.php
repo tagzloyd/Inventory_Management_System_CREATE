@@ -67,7 +67,7 @@ class InventoryDataSeeder extends Seeder
 
             // Seed faculty
             DB::table('faculty')->insert([
-                ['id' => 1, 'name' => 'Others', 'office_id' => 1, 'email' =>1, 'create@carsu.edu.ph', 'phone' => null, 'created_at' => '2025-07-20 17:06:08', 'updated_at' => '2025-07-20 21:01:24'],
+                ['id' => 1, 'name' => 'Others', 'office_id' => 1, 'email' => null, 'phone' => null, 'created_at' => '2025-07-20 17:06:08', 'updated_at' => '2025-07-20 21:01:24'],
                 ['id' => 2, 'name' => 'Aljon E. Bocobo', 'office_id' => 2, 'email' => 'create@carsu.edu.ph', 'phone' => null, 'created_at' => '2025-07-20 17:06:08', 'updated_at' => '2025-07-20 21:01:24'],
                 ['id' => 3, 'name' => 'Neil Caesar M. Tado', 'office_id' => 4, 'email' => null, 'phone' => null, 'created_at' => '2025-07-20 21:01:15', 'updated_at' => '2025-07-20 21:01:15'],
                 ['id' => 4, 'name' => 'May Rose B. Osoteo', 'office_id' => 4, 'email' => null, 'phone' => null, 'created_at' => '2025-07-20 21:02:17', 'updated_at' => '2025-07-20 21:02:17'],
