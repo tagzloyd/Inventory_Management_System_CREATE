@@ -10,7 +10,6 @@ class Inventory extends Model
     
     protected $fillable = [
         'equipment_name',
-        'category_id',
         'faculty_id',
         'office_id',
         'serial_number',
