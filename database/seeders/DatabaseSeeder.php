@@ -263,9 +263,13 @@ class DatabaseSeeder extends Seeder
             ]
         ]);
 
+        // First, disable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
         // Clear existing inventory
         DB::table('inventory')->truncate();
-        // Insert inventory items directly
+
+        // Insert all inventory items
         DB::table('inventory')->insert([
             [
                 'equipment_name' => 'Single Cylinder Diesel Engine',
@@ -629,10 +633,12 @@ class DatabaseSeeder extends Seeder
             ]
         ]);
 
-        // Clear existing inventory category
+        // Clear existing inventory_category
         DB::table('inventory_category')->truncate();
-        // Insert inventory categories directly
+
+        // Insert only inventory_category relationships for existing inventory items
         DB::table('inventory_category')->insert([
+            // First 24 items (which exist in inventory)
             ['inventory_id' => 1, 'category_id' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 1, 'category_id' => 3, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 2, 'category_id' => 1, 'created_at' => now(), 'updated_at' => now()],
@@ -665,10 +671,15 @@ class DatabaseSeeder extends Seeder
             ['inventory_id' => 24, 'category_id' => 2, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 25, 'category_id' => 3, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 26, 'category_id' => 3, 'created_at' => now(), 'updated_at' => now()],
+            // Skip items 25-27 as they don't exist
+            // Add relationships for items 28-31 only if they exist in inventory
             ['inventory_id' => 28, 'category_id' => 2, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 29, 'category_id' => 10, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 30, 'category_id' => 15, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 31, 'category_id' => 17, 'created_at' => now(), 'updated_at' => now()],
         ]);
+
+        // Re-enable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }
