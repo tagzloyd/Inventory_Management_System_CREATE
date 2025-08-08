@@ -262,12 +262,6 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => now(),
             ]
         ]);
-
-        // Clear existing inventory
-        DB::table('inventory')->truncate();
-        
-        // Clear existing inventory category
-        DB::table('inventory_category')->truncate();
         
     }
 }
