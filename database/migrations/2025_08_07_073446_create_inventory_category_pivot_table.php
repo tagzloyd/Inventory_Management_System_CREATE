@@ -10,11 +10,23 @@ return new class extends Migration
     {
         Schema::create('inventory_category', function (Blueprint $table) {
             $table->unsignedBigInteger('inventory_id');
-            $table->timestamps(); // creates created_at and updated_at columns
-         
-            // Add foreign key constraints (recommended)
-            $table->foreign('inventory_id')->references('id')->on('inventory')->onDelete('cascade');
-            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
+            $table->unsignedBigInteger('category_id');
+            $table->timestamps();
+
+            // Set charset and collation
+            $table->charset = 'utf8mb4';
+            $table->collation = 'utf8mb4_general_ci';
+            
+            // Add foreign key constraints
+            $table->foreign('inventory_id')
+                  ->references('id')
+                  ->on('inventory')
+                  ->onDelete('cascade');
+                  
+            $table->foreign('category_id')
+                  ->references('id')
+                  ->on('categories')
+                  ->onDelete('cascade');
             
             // Set composite primary key
             $table->primary(['inventory_id', 'category_id']);
