@@ -126,5 +126,86 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ]);
+
+        // Clear existing offices
+        DB::table('offices')->truncate();
+        // Insert offices directly
+        DB::table('offices')->insert([
+            [
+                'name' => 'Old Farm Mech Building',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'New Farm Mech Building',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Create',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Dabe',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'CSU-ORGMS Production Area',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name'=> 'Hinang 101',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Hinang 109',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Hinang 301',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Hinang 307 / Drawing Room',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Geomatics Laboratory',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'GE Dept. Office',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        ]);
+
+        // Clear existing inventory
+        DB::table('inventory')->truncate();
+        // Insert inventory items directly
+        DB::table('inventory')->insert([
+            [
+                'name' => 'Single Cylinder Diesel Engine',
+                'category_id' => 1, // AB Power Engineering
+                'office_id' => 1, // Old Farm Mech Building
+                'facility_id' => 1, // Create
+                'serial_number' => 'DIESEL-001',
+                'date_acquired' => null,
+                'notes' => null,
+                'remarks' => 'Functional',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            
+        ]);
+
     }
 }
