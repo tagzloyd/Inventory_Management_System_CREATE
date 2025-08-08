@@ -266,7 +266,7 @@ class DatabaseSeeder extends Seeder
         // Clear existing inventory
         DB::table('inventory')->truncate();
         // Insert inventory items directly
-        $inventoryItems = [
+        DB::table('inventory')->insert([
             [
                 'id' => 1,
                 'equipment_name' => 'Single Cylinder Diesel Engine',
@@ -278,7 +278,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 2,
@@ -291,7 +291,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 3,
@@ -304,7 +304,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 4,
@@ -317,7 +317,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 5,
@@ -330,7 +330,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 6,
@@ -343,7 +343,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 7,
@@ -356,7 +356,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 2,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 8,
@@ -369,7 +369,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 9,
@@ -382,7 +382,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 10,
@@ -395,7 +395,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 5,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 11,
@@ -408,7 +408,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 3,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 12,
@@ -421,7 +421,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 3,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 13,
@@ -434,7 +434,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 14,
@@ -447,7 +447,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 15,
@@ -460,7 +460,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 10,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 16,
@@ -473,7 +473,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 4,
                 'faculty_id' => 3,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 17,
@@ -486,7 +486,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 10,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 18,
@@ -499,7 +499,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 19,
@@ -512,7 +512,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 20,
@@ -525,7 +525,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 21,
@@ -538,7 +538,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 22,
@@ -551,7 +551,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 23,
@@ -564,7 +564,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 24,
@@ -577,7 +577,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 25,
@@ -590,7 +590,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 26,
@@ -603,7 +603,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 28,
@@ -616,7 +616,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 4,
                 'faculty_id' => 3,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 29,
@@ -629,7 +629,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 7,
                 'faculty_id' => 3,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 30,
@@ -642,7 +642,7 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 3,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'id' => 31,
@@ -655,16 +655,14 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 3,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]
-        ];
+        ]);
 
-        foreach ($inventoryItems as $item) {
-            DB::table('inventory')->insert($item);
-        }
-
-        // Insert inventory_category relationships
-        $inventoryCategories = [
+        // Clear existing inventory category
+        DB::table('inventory_category')->truncate();
+        // Insert inventory categories directly
+        DB::table('inventory_category')->insert([
             ['inventory_id' => 1, 'category_id' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 1, 'category_id' => 3, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 2, 'category_id' => 1, 'created_at' => now(), 'updated_at' => now()],
@@ -701,7 +699,6 @@ class DatabaseSeeder extends Seeder
             ['inventory_id' => 29, 'category_id' => 10, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 30, 'category_id' => 15, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 31, 'category_id' => 17, 'created_at' => now(), 'updated_at' => now()],
-        ];
-        DB::table('inventory_category')->insert($inventoryCategories);
+        ]);
     }
 }
