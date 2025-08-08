@@ -266,8 +266,9 @@ class DatabaseSeeder extends Seeder
         // Clear existing inventory
         DB::table('inventory')->truncate();
         // Insert inventory items directly
-        DB::table('inventory')->insert([
+        $inventoryItems = [
             [
+                'id' => 1,
                 'equipment_name' => 'Single Cylinder Diesel Engine',
                 'serial_number' => 'Yanmar: 572436',
                 'date_acquired' => null,
@@ -277,9 +278,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 2,
                 'equipment_name' => 'Single Cylinder Diesel Engine',
                 'serial_number' => 'Swan: 4/99',
                 'date_acquired' => null,
@@ -289,9 +291,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 3,
                 'equipment_name' => 'Single Cylinder Diesel Engine',
                 'serial_number' => 'Hakata: N/A',
                 'date_acquired' => null,
@@ -301,9 +304,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 4,
                 'equipment_name' => 'Single Cylinder Diesel Engine',
                 'serial_number' => 'KUWCO.N/A',
                 'date_acquired' => null,
@@ -313,9 +317,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 5,
                 'equipment_name' => 'Single Cylinder Gasoline Engine',
                 'serial_number' => 'HM22023526',
                 'date_acquired' => null,
@@ -325,9 +330,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 6,
                 'equipment_name' => 'Mechanic Tools',
                 'serial_number' => null,
                 'date_acquired' => null,
@@ -337,9 +343,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 7,
                 'equipment_name' => 'Tachometer',
                 'serial_number' => 'N1036611-2',
                 'date_acquired' => null,
@@ -349,9 +356,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 2,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 8,
                 'equipment_name' => 'Single Cylinder Gasoline Engine',
                 'serial_number' => null,
                 'date_acquired' => null,
@@ -361,9 +369,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 9,
                 'equipment_name' => 'Single Cylinder Diesel Engine',
                 'serial_number' => null,
                 'date_acquired' => null,
@@ -373,9 +382,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 10,
                 'equipment_name' => 'Two-wheel tractor',
                 'serial_number' => null,
                 'date_acquired' => null,
@@ -385,9 +395,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 5,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 11,
                 'equipment_name' => 'Four-wheel tractor',
                 'serial_number' => null,
                 'date_acquired' => null,
@@ -397,9 +408,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 3,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 12,
                 'equipment_name' => 'Electric motors',
                 'serial_number' => null,
                 'date_acquired' => null,
@@ -409,9 +421,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 3,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 13,
                 'equipment_name' => 'Solar Meter',
                 'serial_number' => 'CEGS-22-76',
                 'date_acquired' => null,
@@ -421,9 +434,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 14,
                 'equipment_name' => 'Digital anemometer',
                 'serial_number' => '028766',
                 'date_acquired' => null,
@@ -433,9 +447,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 15,
                 'equipment_name' => 'e Anemometer and Differential M4',
                 'serial_number' => '28766',
                 'date_acquired' => null,
@@ -445,9 +460,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 10,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 16,
                 'equipment_name' => 'Digital Hot Wire Anemometer Kit',
                 'serial_number' => 'A.058332',
                 'date_acquired' => '06/25/23',
@@ -457,9 +473,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 4,
                 'faculty_id' => 3,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 17,
                 'equipment_name' => 'Desktop Computers',
                 'serial_number' => null,
                 'date_acquired' => null,
@@ -469,9 +486,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 10,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 18,
                 'equipment_name' => 'Bomb Calorimeter',
                 'serial_number' => null,
                 'date_acquired' => null,
@@ -481,9 +499,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 19,
                 'equipment_name' => 'Plastic Container 201',
                 'serial_number' => null,
                 'date_acquired' => null,
@@ -493,9 +512,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 20,
                 'equipment_name' => 'Graduated Cylinder 500 ml',
                 'serial_number' => null,
                 'date_acquired' => null,
@@ -505,9 +525,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 21,
                 'equipment_name' => 'Graduated Cylinder 250ml',
                 'serial_number' => null,
                 'date_acquired' => null,
@@ -517,9 +538,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 22,
                 'equipment_name' => '2 Digital Balance',
                 'serial_number' => 'JN20220630001',
                 'date_acquired' => null,
@@ -529,9 +551,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 23,
                 'equipment_name' => 'Analytical Balance',
                 'serial_number' => '220704075',
                 'date_acquired' => null,
@@ -541,9 +564,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 24,
                 'equipment_name' => 'Top Loading Balance',
                 'serial_number' => 'CEIT-18-973',
                 'date_acquired' => null,
@@ -553,9 +577,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 25,
                 'equipment_name' => 'Mechanic Tools',
                 'serial_number' => null,
                 'date_acquired' => null,
@@ -565,9 +590,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 26,
                 'equipment_name' => 'Photo Digital Tachometer',
                 'serial_number' => '187501',
                 'date_acquired' => null,
@@ -577,9 +603,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 27,
                 'equipment_name' => 'Top Loading Balance',
                 'serial_number' => 'D465531824',
                 'date_acquired' => '6/26/2002',
@@ -589,9 +616,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 4,
                 'faculty_id' => 3,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 28,
                 'equipment_name' => 'Laboratory Oven',
                 'serial_number' => null,
                 'date_acquired' => '01/14/2021',
@@ -601,9 +629,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 7,
                 'faculty_id' => 3,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 29,
                 'equipment_name' => 'Thermocouple Extension Wire',
                 'serial_number' => 'CREATE-0032',
                 'date_acquired' => '06/26/20',
@@ -613,9 +642,10 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 3,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 30,
                 'equipment_name' => 'Water Quality Testing Kit Biobase Model',
                 'serial_number' => '22A 106489',
                 'date_acquired' => null,
@@ -625,14 +655,16 @@ class DatabaseSeeder extends Seeder
                 'office_id' => 2,
                 'faculty_id' => 3,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ]
-        ]);
+        ];
 
-        // Clear existing inventory category
-        DB::table('inventory_category')->truncate();
-        // Insert inventory categories directly
-        DB::table('inventory_category')->insert([
+        foreach ($inventoryItems as $item) {
+            DB::table('inventory')->insert($item);
+        }
+
+        // Insert inventory_category relationships
+        $inventoryCategories = [
             ['inventory_id' => 1, 'category_id' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 1, 'category_id' => 3, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 2, 'category_id' => 1, 'created_at' => now(), 'updated_at' => now()],
@@ -669,6 +701,7 @@ class DatabaseSeeder extends Seeder
             ['inventory_id' => 29, 'category_id' => 10, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 30, 'category_id' => 15, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 31, 'category_id' => 17, 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        ];
+        DB::table('inventory_category')->insert($inventoryCategories);
     }
 }
