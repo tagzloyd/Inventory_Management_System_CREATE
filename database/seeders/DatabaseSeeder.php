@@ -18,14 +18,14 @@ class DatabaseSeeder extends Seeder
         // Disable foreign key checks (MySQL only) - REMOVE or COMMENT OUT for PostgreSQL
         // DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        // Clear existing data
-        DB::table('categories')->truncate();
-        DB::table('offices')->truncate();
-        DB::table('faculty')->truncate();
-        DB::table('inventory')->truncate();
-        DB::table('inventory_category')->truncate();
-        DB::table('schedules')->truncate();
-        DB::table('users')->truncate();
+        // // Clear existing data
+        // DB::table('categories')->truncate();
+        // DB::table('offices')->truncate();
+        // DB::table('faculty')->truncate();
+        // DB::table('inventory')->truncate();
+        // DB::table('inventory_category')->truncate();
+        // DB::table('schedules')->truncate();
+        // DB::table('users')->truncate();
 
         // Seed categories
         $categories = [
