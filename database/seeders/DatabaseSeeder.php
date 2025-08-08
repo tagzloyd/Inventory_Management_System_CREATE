@@ -188,10 +188,10 @@ class DatabaseSeeder extends Seeder
             ]
         ]);
 
-        //Clear existing facilties
-        DB::table('faculties')->truncate();
+        //Clear existing faculty
+        DB::table('faculty')->truncate();
         // Insert faculty members directly
-        DB::table('faculties')->insert([
+        DB::table('faculty')->insert([
             [
                 'name' => 'Others',
                 'office_id' => 1, // Old Farm Mech Building
