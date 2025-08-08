@@ -61,7 +61,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     <form className="flex flex-col gap-4" onSubmit={submit}>
                         <div className="flex justify-center mb-4">
                             <img 
-                                src="/public/images/CSU-logo.png" 
+                                src="/images/CSU-logo.png" 
                                 alt="CSU Logo" 
                                 className="h-16"
                             />

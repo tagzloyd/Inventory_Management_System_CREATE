@@ -11,7 +11,7 @@ export default function Welcome() {
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="flex justify-center">
                         <img 
-                            src="/images/csu-logo.png" 
+                            src="/images/CSU-logo.png" 
                             alt="CSU Logo" 
                             className="h-50 w-30 mb-4"
                         />
