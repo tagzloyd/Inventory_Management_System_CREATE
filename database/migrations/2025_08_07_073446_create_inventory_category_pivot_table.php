@@ -12,11 +12,7 @@ return new class extends Migration
             $table->unsignedBigInteger('inventory_id');
             $table->unsignedBigInteger('category_id');
             $table->timestamps(); // creates created_at and updated_at columns
-            
-            // Set the charset and collation (matches your SQL)
-            $table->charset = 'utf8mb4';
-            $table->collation = 'utf8mb4_general_ci';
-            
+         
             // Add foreign key constraints (recommended)
             $table->foreign('inventory_id')->references('id')->on('inventory')->onDelete('cascade');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
