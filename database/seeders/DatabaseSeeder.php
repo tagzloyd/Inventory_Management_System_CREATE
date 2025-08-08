@@ -188,24 +188,58 @@ class DatabaseSeeder extends Seeder
             ]
         ]);
 
-        // Clear existing inventory
-        DB::table('inventory')->truncate();
-        // Insert inventory items directly
-        DB::table('inventory')->insert([
+        //Clear existing facilties
+        DB::table('faculties')->truncate();
+        // Insert faculty members directly
+        DB::table('faculties')->insert([
             [
-                'name' => 'Single Cylinder Diesel Engine',
-                'category_id' => 1, // AB Power Engineering
+                'name' => 'Others',
                 'office_id' => 1, // Old Farm Mech Building
-                'facility_id' => 1, // Create
-                'serial_number' => 'DIESEL-001',
-                'date_acquired' => null,
-                'notes' => null,
-                'remarks' => 'Functional',
+                'email' => 'loyd.tagaro@example.com',
+                'phone' => '09123456789',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+            [
+                'name' => 'Aljun E. Bocobo',
+                'office_id' => 2, // New Farm Mech Building
+                'email' => 'aljun.bocobo@example.com',
+                'phone' => '09123456789',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ]);
+        // // Clear existing inventory
+        // DB::table('inventory')->truncate();
+        // // Insert inventory items directly
+        // DB::table('inventory')->insert([
+        //     [
+        //         'name' => 'Single Cylinder Diesel Engine',
+        //         'category_id' => 1, // AB Power Engineering
+        //         'office_id' => 1, // Old Farm Mech Building
+        //         'facility_id' => 1, // Create
+        //         'serial_number' => 'DIESEL-001',
+        //         'date_acquired' => null,
+        //         'notes' => null,
+        //         'remarks' => 'Functional',
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ],
+
+        // ]);
+
+        // // Clear existing inventory category
+        // DB::table('inventory_category')->truncate();
+        // // Insert inventory categories directly
+        // DB::table('inventory_category')->insert([
+        //     [
+        //         'inventory_id' => 1, // Single Cylinder Diesel Engine 
+        //         'category_id' => 1, // AB Power Engineering
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ],
+
+        // ]);
 
     }
 }
