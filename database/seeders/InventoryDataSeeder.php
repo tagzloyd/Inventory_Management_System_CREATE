@@ -30,6 +30,7 @@ class InventoryDataSeeder extends Seeder
 
             // Seed categories
             DB::table('categories')->insert([
+                ['id' => 1, 'name' => 'AB Power Engineering', 'created_at' => '2025-07-15 17:30:22', 'updated_at' => '2025-07-15 17:30:22'],
                 ['id' => 2, 'name' => 'Renewable Energy for AB Applications', 'created_at' => '2025-07-15 17:30:22', 'updated_at' => '2025-07-15 17:30:22'],
                 ['id' => 3, 'name' => 'AB Machinery and Mechanization', 'created_at' => '2025-07-15 17:36:25', 'updated_at' => '2025-07-15 17:36:25'],
                 ['id' => 4, 'name' => 'Machine Design for AB Production', 'created_at' => '2025-07-15 17:36:35', 'updated_at' => '2025-07-15 17:36:40'],
@@ -50,6 +51,7 @@ class InventoryDataSeeder extends Seeder
 
             // Seed offices
             DB::table('offices')->insert([
+                ['id' => 1, 'office_name' => 'Old Farm Mech Building', 'created_at' => '2025-07-15 17:23:38', 'updated_at' => '2025-07-15 17:23:38'],
                 ['id' => 2, 'office_name' => 'Create', 'created_at' => '2025-07-15 17:23:38', 'updated_at' => '2025-07-15 17:23:38'],
                 ['id' => 3, 'office_name' => 'New Farm Mech Building', 'created_at' => '2025-07-15 17:23:46', 'updated_at' => '2025-07-15 17:23:46'],
                 ['id' => 4, 'office_name' => 'DABE', 'created_at' => '2025-07-15 17:23:55', 'updated_at' => '2025-07-15 17:23:55'],
@@ -65,6 +67,7 @@ class InventoryDataSeeder extends Seeder
 
             // Seed faculty
             DB::table('faculty')->insert([
+                ['id' => 1, 'name' => 'Others', 'office_id' => 1, 'email' =>1, 'create@carsu.edu.ph', 'phone' => null, 'created_at' => '2025-07-20 17:06:08', 'updated_at' => '2025-07-20 21:01:24'],
                 ['id' => 2, 'name' => 'Aljon E. Bocobo', 'office_id' => 2, 'email' => 'create@carsu.edu.ph', 'phone' => null, 'created_at' => '2025-07-20 17:06:08', 'updated_at' => '2025-07-20 21:01:24'],
                 ['id' => 3, 'name' => 'Neil Caesar M. Tado', 'office_id' => 4, 'email' => null, 'phone' => null, 'created_at' => '2025-07-20 21:01:15', 'updated_at' => '2025-07-20 21:01:15'],
                 ['id' => 4, 'name' => 'May Rose B. Osoteo', 'office_id' => 4, 'email' => null, 'phone' => null, 'created_at' => '2025-07-20 21:02:17', 'updated_at' => '2025-07-20 21:02:17'],
