@@ -59,9 +59,9 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
 
                     <form className="flex flex-col gap-4" onSubmit={submit}>
-                        <div className="flex justify-center mb-">
+                        <div className="flex justify-center mb-4">
                             <img 
-                                src="/images/CSU-logo.png" 
+                                src="/public/images/CSU-logo.png" 
                                 alt="CSU Logo" 
                                 className="h-16"
                             />
