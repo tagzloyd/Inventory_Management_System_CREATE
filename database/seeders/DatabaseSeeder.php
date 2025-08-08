@@ -132,57 +132,57 @@ class DatabaseSeeder extends Seeder
         // Insert offices directly
         DB::table('offices')->insert([
             [
-                'name' => 'Old Farm Mech Building',
+                'office_name' => 'Old Farm Mech Building',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'New Farm Mech Building',
+                'office_name' => 'New Farm Mech Building',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Create',
+                'office_name' => 'Create',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Dabe',
+                'office_name' => 'Dabe',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'CSU-ORGMS Production Area',
+                'office_name' => 'CSU-ORGMS Production Area',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name'=> 'Hinang 101',
+                'office_name'=> 'Hinang 101',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Hinang 109',
+                'office_name' => 'Hinang 109',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Hinang 301',
+                'office_name' => 'Hinang 301',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Hinang 307 / Drawing Room',
+                'office_name' => 'Hinang 307 / Drawing Room',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Geomatics Laboratory',
+                'office_name' => 'Geomatics Laboratory',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'GE Dept. Office',
+                'office_name' => 'GE Dept. Office',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
