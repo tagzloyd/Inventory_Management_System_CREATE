@@ -582,9 +582,9 @@ export default function Index() {
                       // 2. It's the current item being edited, OR
                       // 3. The current event status is Cancelled or Completed
                       const isAvailable = !isScheduled || 
-                                        isCurrentItem || 
-                                        (currentEventStatus && ['Cancelled', 'Completed'].includes(currentEventStatus));
-                      
+                        isCurrentItem || 
+                        (currentEventStatus && ['Cancelled', 'Completed'].includes(currentEventStatus));
+                        
                       return (
                         <SelectItem 
                           key={item.id} 

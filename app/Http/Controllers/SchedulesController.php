@@ -47,10 +47,10 @@ class SchedulesController extends Controller
                 ];
             });
 
-        // Get all scheduled inventory IDs for the month
+        // Only get inventory IDs that are currently scheduled (status = Scheduled)
         $scheduledInventoryIds = Schedule::whereYear('schedule_date', $request->year)
             ->whereMonth('schedule_date', $request->month)
-            ->where('status', '!=', 'Cancelled')
+            ->where('status', 'Scheduled')  // Only include 'Scheduled' status
             ->pluck('inventory_id')
             ->unique()
             ->values()
