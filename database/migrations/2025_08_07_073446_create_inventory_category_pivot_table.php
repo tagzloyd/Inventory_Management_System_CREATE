@@ -8,16 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('inventory_category', function (Blueprint $table) {
-            $table->unsignedBigInteger('inventory_id');
-            $table->timestamps(); // creates created_at and updated_at columns
-         
-            // Add foreign key constraints (recommended)
-            $table->foreign('inventory_id')->references('id')->on('inventory')->onDelete('cascade');
-            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
-            
-            // Set composite primary key
-            $table->primary(['inventory_id', 'category_id']);
+         Schema::create('inventory_category', function (Blueprint $table) {
+            $table->foreignId('inventory_id')->constrained('inventory')->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
+            $table->timestamps();
         });
     }
 
