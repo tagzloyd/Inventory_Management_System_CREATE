@@ -38,18 +38,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     return (
         <>
             <Head title="CSU Inventory Login" />
-            
-            {/* CSU Header
-            <div className="bg-[#0C4B33] text-white py-2 px-4">
-                <div className="container mx-auto flex justify-between items-center">
-                    <div className="text-sm">
-                        Caraga State University
-                    </div>
-                    <div className="flex space-x-4 text-sm">
-                        <a href="https://www.carsu.edu.ph/" className="hover:underline">CSU Main Website</a>
-                    </div>
-                </div>
-            </div> */}
 
             <AuthLayout 
                 title="Welcome to Inventory Management System"
@@ -59,7 +47,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
 
                     <form className="flex flex-col gap-4" onSubmit={submit}>
-                        <div className="flex justify-center mb-4">
+                        <div className="flex justify-center mb-">
                             <img 
                                 src="/images/CSU-logo.png" 
                                 alt="CSU Logo" 
