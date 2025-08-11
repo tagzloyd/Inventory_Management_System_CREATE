@@ -96,7 +96,7 @@ class SchedulesController extends Controller
             'name' => 'required|string|max:100',
             'inventory_id' => 'required|exists:inventory,id',
             'schedule_date' => 'required|date',
-            'status' => 'sometimes|in:Scheduled,Completed,Cancelled',
+            'status' => 'sometimes|in:Scheduled,Returned,Cancelled',
             'description' => 'nullable|string',
         ]);
 
@@ -154,7 +154,7 @@ class SchedulesController extends Controller
             'name' => 'sometimes|required|string|max:100',
             'inventory_id' => 'sometimes|required|exists:inventory,id',
             'schedule_date' => 'sometimes|required|date',
-            'status' => 'sometimes|required|in:Scheduled,Completed,Cancelled',
+            'status' => 'sometimes|required|in:Scheduled,Returned,Cancelled',
             'description' => 'nullable|string',
         ]);
 
