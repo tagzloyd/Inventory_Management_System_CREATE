@@ -238,7 +238,7 @@ export default function Index() {
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case 'Returned': return 'default';
+      case 'Completed': return 'default';
       case 'Cancelled': return 'destructive';
       default: return 'secondary';
     }
@@ -246,7 +246,7 @@ export default function Index() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Returned': return 'bg-green-100 text-green-800 border-green-200';
+      case 'Completed': return 'bg-green-100 text-green-800 border-green-200';
       case 'Cancelled': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-blue-100 text-blue-800 border-blue-200';
     }
@@ -614,7 +614,7 @@ export default function Index() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Scheduled">Scheduled</SelectItem>
-                    <SelectItem value="Returned">Returned</SelectItem>
+                    <SelectItem value="Completed">Completed</SelectItem>
                     <SelectItem value="Cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>

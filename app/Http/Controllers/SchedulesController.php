@@ -96,7 +96,7 @@ class SchedulesController extends Controller
             'name' => 'required|string|max:100',
             'inventory_id' => 'required|exists:inventory,id',
             'schedule_date' => 'required|date',
-            'status' => 'sometimes|in:Scheduled,Returned,Cancelled',
+            'status' => 'sometimes|in:Scheduled,Completed,Cancelled',
             'description' => 'nullable|string',
         ]);
 
@@ -108,7 +108,6 @@ class SchedulesController extends Controller
         $existingSchedule = Schedule::where('inventory_id', $request->inventory_id)
             ->whereDate('schedule_date', $request->schedule_date)
             ->where('status', '!=', 'Cancelled')
-            ->where('status', '!=', 'Returned')
             ->first();
 
         if ($existingSchedule) {
@@ -155,7 +154,7 @@ class SchedulesController extends Controller
             'name' => 'sometimes|required|string|max:100',
             'inventory_id' => 'sometimes|required|exists:inventory,id',
             'schedule_date' => 'sometimes|required|date',
-            'status' => 'sometimes|required|in:Scheduled,Returned,Cancelled',
+            'status' => 'sometimes|required|in:Scheduled,Completed,Cancelled',
             'description' => 'nullable|string',
         ]);
 
@@ -168,7 +167,6 @@ class SchedulesController extends Controller
             $existingSchedule = Schedule::where('inventory_id', $request->inventory_id ?? $schedule->inventory_id)
                 ->whereDate('schedule_date', $request->schedule_date ?? $schedule->schedule_date)
                 ->where('status', '!=', 'Cancelled')
-                ->where('status', '!=', 'Returned')
                 ->where('id', '!=', $schedule->id)
                 ->first();
 

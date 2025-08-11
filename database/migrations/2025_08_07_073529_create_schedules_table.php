@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->foreignId('inventory_id')->constrained('inventory');
             $table->date('schedule_date');
-            $table->enum('status', ['Scheduled', 'Returned', 'Cancelled'])->default('Scheduled');
+            $table->enum('status', ['Scheduled', 'Completed', 'Cancelled'])->default('Scheduled');
             $table->text('description')->nullable();
             $table->timestamps();
         });
