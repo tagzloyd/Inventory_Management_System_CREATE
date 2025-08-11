@@ -107,8 +107,7 @@ class SchedulesController extends Controller
         // Check if inventory is already scheduled for this date
         $existingSchedule = Schedule::where('inventory_id', $request->inventory_id)
             ->whereDate('schedule_date', $request->schedule_date)
-            ->where('status', '!=', 'Cancelled')
-            ->where('status', '!=', 'Completed')
+            ->where('status', 'Scheduled')  // Only check for 'Scheduled' status
             ->first();
 
         if ($existingSchedule) {
@@ -167,8 +166,7 @@ class SchedulesController extends Controller
         if ($request->has('inventory_id') || $request->has('schedule_date')) {
             $existingSchedule = Schedule::where('inventory_id', $request->inventory_id ?? $schedule->inventory_id)
                 ->whereDate('schedule_date', $request->schedule_date ?? $schedule->schedule_date)
-                ->where('status', '!=', 'Cancelled')
-                ->where('status', '!=', 'Completed')
+                ->where('status', 'Scheduled')  // Only check for 'Scheduled' status
                 ->where('id', '!=', $schedule->id)
                 ->first();
 
