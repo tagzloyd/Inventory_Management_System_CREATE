@@ -575,16 +575,25 @@ export default function Index() {
                     {inventoryItems.map(item => {
                       const isScheduled = scheduledInventoryIds.includes(item.id);
                       const isCurrentItem = currentEvent?.inventory_id === item.id;
+                      const currentEventStatus = currentEvent?.status;
+                      
+                      // Equipment should be available if:
+                      // 1. It's not scheduled, OR
+                      // 2. It's the current item being edited, OR
+                      // 3. The current event status is Cancelled or Completed
+                      const isAvailable = !isScheduled || 
+                                        isCurrentItem || 
+                                        (currentEventStatus && ['Cancelled', 'Completed'].includes(currentEventStatus));
                       
                       return (
                         <SelectItem 
                           key={item.id} 
                           value={item.id.toString()}
-                          disabled={isScheduled && !isCurrentItem}
-                          className={isScheduled && !isCurrentItem ? 'opacity-50' : ''}
+                          disabled={!isAvailable}
+                          className={!isAvailable ? 'opacity-50' : ''}
                         >
                           {item.equipment_name}
-                          {isScheduled && !isCurrentItem && ' (Scheduled)'}
+                          {isScheduled && !isAvailable && ' (Scheduled)'}
                         </SelectItem>
                       );
                     })}
