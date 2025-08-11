@@ -71,6 +71,10 @@ class InventoryController extends Controller
     public function destroy($id)
     {
         $inventory = Inventory::findOrFail($id);
+        
+        // Detach all categories first
+        $inventory->categories()->detach();
+        
         $inventory->delete();
 
         return response()->noContent();
