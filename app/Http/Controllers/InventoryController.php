@@ -70,8 +70,11 @@ class InventoryController extends Controller
     }
     public function destroy($id)
     {
-        $inventory = Inventory::findOrFail($id);
-        $inventory->delete();
+        DB::transaction(function () use ($id) {
+            $inventory = Inventory::findOrFail($id);
+            $inventory->categories()->detach();
+            $inventory->delete();
+        });
 
         return response()->noContent();
     }
