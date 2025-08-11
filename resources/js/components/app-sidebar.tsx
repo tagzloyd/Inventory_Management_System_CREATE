@@ -2,7 +2,7 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link } from '@inertiajs/react';
-import { BookMarkedIcon, BookOpen, BoxIcon, Calendar1Icon, CalendarArrowDown, CalendarClockIcon, Circle, CogIcon, Folder, LayoutGrid, LucidePersonStanding, PanelBottom, PanelTopCloseIcon, PersonStanding, ReceiptPoundSterlingIcon, TruckIcon, Warehouse, WarehouseIcon, ChevronDown, ChevronUp } from 'lucide-react';
+import { BookMarkedIcon, BookOpen, BoxIcon, Calendar1Icon, CalendarArrowDown, CalendarClockIcon, Circle, CogIcon, Folder, LayoutGrid, LucidePersonStanding, PanelBottom, PanelTopCloseIcon, PersonStanding, ReceiptPoundSterlingIcon, TruckIcon, Warehouse, WarehouseIcon, ChevronDown, ChevronUp, GlassWaterIcon, LucideGlasses, MicroscopeIcon, LucideWarehouse } from 'lucide-react';
 import AppLogo from './app-logo';
 import { NavGroup } from '@/types';
 import { useState } from 'react';
@@ -10,40 +10,39 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/component
 
 const mainNavItems = [
     {
-        //
+        title: 'Dashboard',
+        href: '/dashboard',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Office/Categories',
+        href: '/categories',
+        icon: Folder,
+    },
+    {
+        title: 'Faculties',
+        href: '/faculty',
+        icon: PersonStanding,
     }
 ];
 
 const secondaryNavItems: NavGroup[] = [
     {
-        title: 'Main',
-        items: [
+        title: 'Equipment',
+        items: [  
             {
-                title: 'Dashboard',
-                href: '/dashboard',
-                icon: LayoutGrid,
-            }
-        ],
-    },
-    {
-        title: 'Inventory',
-        items: [            
-            {
-                title: 'Office/Categories',
-                href: '/categories',
-                icon: Folder,
-            },
-            {
-                title:  'Equipments',
+                title:  'Inventory',
                 href: '/inventory',
                 icon: WarehouseIcon,
             },
             {
-                title: 'Faculties',
-                href: '/faculty',
-                icon: PersonStanding,
+                title:  'Laboratory',
+                href: '/laboratory',
+                icon: MicroscopeIcon,
             }
+            
         ],
+        icon: LucideWarehouse,
     },
     {
         title: 'Reports',
@@ -69,8 +68,8 @@ const secondaryNavItems: NavGroup[] = [
 
 export function AppSidebar() {
     const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-        'Inventory': true, // Set default open groups here
-        'Reports': true
+        'Equipment': false, // Set default open groups here
+        'Reports': false
     });
 
     const toggleGroup = (groupTitle: string) => {
@@ -95,6 +94,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
+                 <NavMain items={mainNavItems} />
                 <SidebarMenu>
                     {secondaryNavItems.map((group) => (
                         <Collapsible 
@@ -107,7 +107,7 @@ export function AppSidebar() {
                                 <CollapsibleTrigger asChild>
                                     <SidebarMenuButton className="w-full justify-between">
                                         <span>{group.title}</span>
-                                        {openGroups[group.title] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                        {openGroups[group.title] ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
                                     </SidebarMenuButton>
                                 </CollapsibleTrigger>
                             </SidebarMenuItem>
@@ -117,7 +117,7 @@ export function AppSidebar() {
                         </Collapsible>
                     ))}
                 </SidebarMenu>
-                {/* <NavMain items={mainNavItems} /> */}
+               
             </SidebarContent>
 
             <SidebarFooter>

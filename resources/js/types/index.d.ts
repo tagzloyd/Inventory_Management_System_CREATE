@@ -14,6 +14,7 @@ export interface NavGroup {
     title: string;
     items: NavItem[];
     icon?: LucideIcon | null;
+     isActive?: boolean;
 }
 
 export interface NavItem {
