@@ -26,6 +26,19 @@ const mainNavItems = [
     }
 ];
 
+const thirdNavItems = [
+    {
+        title: 'Records',
+        href: '/records',
+        icon: BookMarkedIcon,
+    },
+    {
+        title: 'Calendar',
+        href: '/schedule',
+        icon: CalendarClockIcon,
+    }
+];
+
 const secondaryNavItems: NavGroup[] = [
     {
         title: 'Equipment',
@@ -43,26 +56,6 @@ const secondaryNavItems: NavGroup[] = [
             
         ],
         icon: LucideWarehouse,
-    },
-    {
-        title: 'Reports',
-        items: [
-            {
-                title: 'Records',
-                href: '/records',
-                icon: BookMarkedIcon,
-            },
-        ],
-    },
-    {
-        title: 'Schedules',
-        items: [
-            {
-                title: 'Calendar',
-                href: '/schedule',
-                icon: CalendarClockIcon,
-            },
-        ],
     }
 ];
 
@@ -94,7 +87,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                 <NavMain items={mainNavItems} />
+                <NavMain items={mainNavItems} />
                 <SidebarMenu>
                     {secondaryNavItems.map((group) => (
                         <Collapsible 
@@ -106,7 +99,7 @@ export function AppSidebar() {
                             <SidebarMenuItem>
                                 <CollapsibleTrigger asChild>
                                     <SidebarMenuButton className="w-full justify-between">
-                                        <span>{group.title}</span>
+                                     <div className='font-medium m-2'> {group.title}</div>
                                         {openGroups[group.title] ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
                                     </SidebarMenuButton>
                                 </CollapsibleTrigger>
@@ -117,7 +110,11 @@ export function AppSidebar() {
                         </Collapsible>
                     ))}
                 </SidebarMenu>
-               
+                
+                {/* Divider added here */}
+                <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
+                
+                <NavMain items={thirdNavItems} />
             </SidebarContent>
 
             <SidebarFooter>
