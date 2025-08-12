@@ -12,7 +12,7 @@ class SchedulesController extends Controller
 {
     public function index()
     {
-        return Inertia::render('schedule/index', [
+        return Inertia::render('Schedules/index', [
             'inventoryItems' => Inventory::select('id', 'equipment_name')->get(),
         ]);
     }
