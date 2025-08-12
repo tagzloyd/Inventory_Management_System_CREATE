@@ -33,7 +33,7 @@ const thirdNavItems = [
         icon: BookMarkedIcon,
     },
     {
-        title: 'Calendar',
+        title: 'Schedules',
         href: '/schedule',
         icon: CalendarClockIcon,
     }
@@ -71,8 +71,7 @@ const secondaryNavItems: NavGroup[] = [
 
 export function AppSidebar() {
     const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-        'Equipment': false, // Set default open groups here
-        'Reports': false
+        'Equipment': false, 
     });
 
     const toggleGroup = (groupTitle: string) => {
