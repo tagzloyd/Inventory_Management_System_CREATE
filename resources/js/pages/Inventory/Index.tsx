@@ -59,7 +59,7 @@ function Notification({
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Inventory Management', href: '/dashboard' },
-  { title: 'Equipment', href: '/inventory' },
+  { title: 'Inventory', href: '/inventory' },
 ];
 
 type Category = {
@@ -640,7 +640,7 @@ export default function InventoryIndex() {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Serial Number</label>
+                <label className="text-sm font-medium leading-none">Serial Number / Code No.</label>
                 <Input
                   value={form.serial_number || ""}
                   onChange={e => setForm({ ...form, serial_number: e.target.value })}

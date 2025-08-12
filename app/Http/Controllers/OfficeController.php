@@ -9,7 +9,7 @@ class OfficeController extends Controller
 {
     public function index()
     {
-        return inertia('Inventory/Office', [
+        return inertia('category_office/Office', [
             'offices' => Office::all()
         ]);
     }

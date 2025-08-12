@@ -424,7 +424,7 @@ export default function Dashboard() {
                                                                     Date Acquired {formatDate(item.date_acquired)}
                                                                 </p>
                                                             </div>
-                                                            <Badge variant={statusBadgeVariants[item.remarks] }>
+                                                            <Badge variant={statusBadgeVariants[item.remarks] as "default" | "outline" | "destructive" | "secondary"}>
                                                                 {item.remarks}
                                                             </Badge>
                                                         </div>

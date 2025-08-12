@@ -2,7 +2,7 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link } from '@inertiajs/react';
-import { BookMarkedIcon, BookOpen, BoxIcon, Calendar1Icon, CalendarArrowDown, CalendarClockIcon, Circle, CogIcon, Folder, LayoutGrid, LucidePersonStanding, PanelBottom, PanelTopCloseIcon, PersonStanding, ReceiptPoundSterlingIcon, TruckIcon, Warehouse, WarehouseIcon, ChevronDown, ChevronUp, GlassWaterIcon, LucideGlasses, MicroscopeIcon, LucideWarehouse } from 'lucide-react';
+import { BookMarkedIcon, BookOpen, BoxIcon, Calendar1Icon, CalendarArrowDown, CalendarClockIcon, Circle, CogIcon, Folder, LayoutGrid, LucidePersonStanding, PanelBottom, PanelTopCloseIcon, PersonStanding, ReceiptPoundSterlingIcon, TruckIcon, Warehouse, WarehouseIcon, ChevronDown, ChevronUp, GlassWaterIcon, LucideGlasses, MicroscopeIcon, LucideWarehouse, Wrench, WrenchIcon, ConstructionIcon } from 'lucide-react';
 import AppLogo from './app-logo';
 import { NavGroup } from '@/types';
 import { useState } from 'react';
@@ -49,9 +49,19 @@ const secondaryNavItems: NavGroup[] = [
                 icon: WarehouseIcon,
             },
             {
-                title:  'Laboratory',
-                href: '/laboratory',
-                icon: MicroscopeIcon,
+                title:  'Calibration',
+                href: '/calibration',
+                icon: WrenchIcon,
+            },
+            {
+                title:  'Maintenance',
+                href: '/maintenance',
+                icon: ConstructionIcon,
+            },
+            {
+                title:  'Consumable',
+                href: '/consumable',
+                icon: GlassWaterIcon,
             }
             
         ],

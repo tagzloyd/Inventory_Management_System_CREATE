@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-
-class RecordsController extends Controller
+class CalibrationController extends Controller
 {
     public function index()
     {
-        return Inertia::render('record/Records', []); 
+        return Inertia::render('calibration/index');
     }
 }

@@ -10,7 +10,7 @@ class CategoriesController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Inventory/Categories', [
+        return Inertia::render('category_office/Categories', [
             'category' => Category::withCount('inventories')->get()
         ]);
     }
