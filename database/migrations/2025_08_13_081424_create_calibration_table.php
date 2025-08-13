@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('calibration', function (Blueprint $table) {
                 $table->id();
-                $table->string('instrument_name_or_eq_code')->nullable();
+                $table->string('instrument_name_or_eq_code');
                 $table->string('issued_to')->nullable();
                 $table->string('freq_of_cal')->nullable();
                 $table->timestamps();
