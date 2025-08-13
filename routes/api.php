@@ -8,6 +8,7 @@ use App\Http\Controllers\OfficeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\SchedulesController;
+use App\Http\Controllers\CalibrationController;
 
 
 Route::get('/user', function (Request $request) {
@@ -51,4 +52,17 @@ Route::get('/user', function (Request $request) {
         Route::put('/schedules/{schedule}',  'update');
         Route::delete('/schedules/{schedule}',  'destroy');
     });
-        
+
+    Route::controller(CalibrationController::class)->prefix('calibration')->group(function () {
+        Route::get('/', 'index')->name('calibration.index');
+        Route::get('/fetch', 'fetch')->name('calibration.fetch');
+        Route::post('/', 'store')->name('calibration.store');
+
+        Route::post('/planned', 'storePlanned')->name('calibration.storePlanned');
+        Route::post('/actual', 'storeActual')->name('calibration.storeActual');
+        Route::post('/remarks', 'storeRemarks')->name('calibration.storeRemarks');
+
+        Route::get('/{id}', 'show')->name('calibration.show');
+        Route::put('/{id}', 'update')->name('calibration.update');
+        Route::delete('/{id}', 'destroy')->name('calibration.destroy');
+    });

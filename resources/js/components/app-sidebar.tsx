@@ -2,7 +2,7 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link } from '@inertiajs/react';
-import { BookMarkedIcon, BookOpen, BoxIcon, Calendar1Icon, CalendarArrowDown, CalendarClockIcon, Circle, CogIcon, Folder, LayoutGrid, LucidePersonStanding, PanelBottom, PanelTopCloseIcon, PersonStanding, ReceiptPoundSterlingIcon, TruckIcon, Warehouse, WarehouseIcon, ChevronDown, ChevronUp, GlassWaterIcon, LucideGlasses, MicroscopeIcon, LucideWarehouse, Wrench, WrenchIcon, ConstructionIcon } from 'lucide-react';
+import { BookMarkedIcon, BookOpen, BoxIcon, Calendar1Icon, CalendarArrowDown, CalendarClockIcon, Circle, CogIcon, Folder, LayoutGrid, LucidePersonStanding, PanelBottom, PanelTopCloseIcon, PersonStanding, ReceiptPoundSterlingIcon, TruckIcon, Warehouse, WarehouseIcon, ChevronDown, ChevronUp, GlassWaterIcon, LucideGlasses, MicroscopeIcon, LucideWarehouse, Wrench, WrenchIcon, ConstructionIcon, FileCog2Icon, Cog } from 'lucide-react';
 import AppLogo from './app-logo';
 import { NavGroup } from '@/types';
 import { useState } from 'react';
@@ -61,7 +61,7 @@ const secondaryNavItems: NavGroup[] = [
             {
                 title:  'Consumable',
                 href: '/consumable',
-                icon: GlassWaterIcon,
+                icon: Cog,
             }
             
         ],

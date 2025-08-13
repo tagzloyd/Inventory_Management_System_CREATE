@@ -1,53 +1,635 @@
 import { Head } from '@inertiajs/react';
-
-import AppearanceTabs from '@/components/appearance-tabs';
-import HeadingSmall from '@/components/heading-small';
-import { type BreadcrumbItem } from '@/types';
-
 import AppLayout from '@/layouts/app-layout';
-import SettingsLayout from '@/layouts/settings/layout';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { CardDescription, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useState, useEffect } from 'react';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter,
+} from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import { Trash2, Edit } from 'lucide-react';
 
-const breadcrumbs: BreadcrumbItem[] = [
+const breadcrumbs = [
     { title: 'Inventory Management', href: '/dashboard' },
-    { title: 'Calibration', href: '/calibration' },
+    { title: 'Calibration', href: '/api/calibration' },
 ];
 
+interface Calibration {
+    id: number;
+    instrument_name_or_eq_code: string;
+    issued_to: string;
+    freq_of_cal: string;
+    planned?: {
+        id?: number;
+        jan: string | null;
+        feb: string | null;
+        mar: string | null;
+        apr: string | null;
+        may: string | null;
+        jun: string | null;
+        jul: string | null;
+        aug: string | null;
+        sep: string | null;
+        oct: string | null;
+        nov: string | null;
+        dec: string | null;
+    };
+    actual?: {
+        id?: number;
+        jan: string | null;
+        feb: string | null;
+        mar: string | null;
+        apr: string | null;
+        may: string | null;
+        jun: string | null;
+        jul: string | null;
+        aug: string | null;
+        sep: string | null;
+        oct: string | null;
+        nov: string | null;
+        dec: string | null;
+    };
+    remarks?: {
+        id?: number;
+        jan: string | null;
+        feb: string | null;
+        mar: string | null;
+        apr: string | null;
+        may: string | null;
+        jun: string | null;
+        jul: string | null;
+        aug: string | null;
+        sep: string | null;
+        oct: string | null;
+        nov: string | null;
+        dec: string | null;
+    };
+}
+
 export default function Calibration() {
+    const [calibrations, setCalibrations] = useState<Calibration[]>([]);
+    const [formData, setFormData] = useState({
+        instrument_name_or_eq_code: '',
+        issued_to: '',
+        freq_of_cal: ''
+    });
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+    const [currentCalibration, setCurrentCalibration] = useState<Calibration | null>(null);
+    const [currentField, setCurrentField] = useState<'planned' | 'actual' | 'remarks'>('planned');
+    const [selectedMonths, setSelectedMonths] = useState<Record<string, boolean>>({});
+    const [statusValue, setStatusValue] = useState('');
+    const [remarksValue, setRemarksValue] = useState('');
+
+    useEffect(() => {
+        fetchCalibrations();
+    }, []);
+
+    const fetchCalibrations = async () => {
+        try {
+            const response = await fetch('/api/calibration/fetch');
+            const data = await response.json();
+            
+            const transformedData = data.map((cal: any) => ({
+                ...cal,
+                planned: cal.planned ? cal.planned : null,
+                actual: cal.actual ? cal.actual : null,
+                remarks: cal.remarks ? cal.remarks : null
+            }));
+            
+            setCalibrations(transformedData);
+        } catch (error) {
+            console.error('Error fetching calibrations:', error);
+        }
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const response = await fetch('/api/calibration', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                const newCalibration = await response.json();
+                setCalibrations(prev => [...prev, newCalibration]);
+                setFormData({
+                    instrument_name_or_eq_code: '',
+                    issued_to: '',
+                    freq_of_cal: ''
+                });
+                setIsDialogOpen(false);
+            }
+        } catch (error) {
+            console.error('Error creating calibration:', error);
+        }
+    };
+
+    const handleEditSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!currentCalibration) return;
+
+        try {
+            const response = await fetch(`/api/calibration/${currentCalibration.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                const updatedCalibration = await response.json();
+                setCalibrations(prev => prev.map(cal => 
+                    cal.id === currentCalibration.id ? updatedCalibration : cal
+                ));
+                setIsEditDialogOpen(false);
+            }
+        } catch (error) {
+            console.error('Error updating calibration:', error);
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!confirm('Are you sure you want to delete this calibration record?')) return;
+        
+        try {
+            const response = await fetch(`/api/calibration/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                }
+            });
+
+            if (response.ok) {
+                setCalibrations(prev => prev.filter(cal => cal.id !== id));
+            }
+        } catch (error) {
+            console.error('Error deleting calibration:', error);
+        }
+    };
+
+    const openEditDialog = (calibration: Calibration) => {
+        setCurrentCalibration(calibration);
+        setFormData({
+            instrument_name_or_eq_code: calibration.instrument_name_or_eq_code,
+            issued_to: calibration.issued_to || '',
+            freq_of_cal: calibration.freq_of_cal || ''
+        });
+        setIsEditDialogOpen(true);
+    };
+
+    const handleMonthDataChange = async (
+        calibrationId: number, 
+        months: string[], 
+        field: 'planned' | 'actual' | 'remarks', 
+        value: string
+    ) => {
+        try {
+            const endpoint = `/api/calibration/${field}`;
+            const data: any = {
+                cal_id: calibrationId
+            };
+
+            const allMonths = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+            allMonths.forEach(month => {
+                data[month] = null;
+            });
+
+            months.forEach(month => {
+                data[month] = value;
+            });
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                const updatedData = await response.json();
+                setCalibrations(prev => prev.map(cal => {
+                    if (cal.id === calibrationId) {
+                        return {
+                            ...cal,
+                            [field]: {
+                                ...(cal[field] || {}),
+                                ...updatedData
+                            }
+                        };
+                    }
+                    return cal;
+                }));
+            }
+        } catch (error) {
+            console.error('Error updating calibration details:', error);
+        } finally {
+            setIsStatusDialogOpen(false);
+            setSelectedMonths({});
+            setStatusValue('');
+            setRemarksValue('');
+        }
+    };
+
+    const openStatusDialog = (calibration: Calibration, field: 'planned' | 'actual' | 'remarks') => {
+        setCurrentCalibration(calibration);
+        setCurrentField(field);
+        setIsStatusDialogOpen(true);
+        
+        const initialSelected: Record<string, boolean> = {};
+        const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        months.forEach(month => {
+            initialSelected[month] = false;
+        });
+        setSelectedMonths(initialSelected);
+    };
+
+    const toggleMonthSelection = (month: string) => {
+        setSelectedMonths(prev => ({
+            ...prev,
+            [month]: !prev[month]
+        }));
+    };
+
+    const handleStatusSubmit = () => {
+        const selectedMonthNames = Object.keys(selectedMonths).filter(month => selectedMonths[month]);
+        
+        if (selectedMonthNames.length === 0) return;
+        
+        const valueToUse = currentField === 'remarks' ? remarksValue : statusValue;
+        if (currentCalibration) {
+            handleMonthDataChange(
+                currentCalibration.id,
+                selectedMonthNames,
+                currentField,
+                valueToUse
+            );
+        }
+    };
+
+    const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+    const getMonthValue = (calibration: Calibration, field: 'planned' | 'actual' | 'remarks', month: string): string => {
+        const fieldData = calibration[field];
+        if (!fieldData) return '-';
+        
+        const monthValue = fieldData[month as keyof typeof fieldData];
+        return monthValue !== null && monthValue !== undefined ? String(monthValue) : '-';
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Calibration" />
-<div className="flex flex-col items-center justify-center py-12">
-                <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md text-center max-w-md w-full">
-                    <svg
-                        className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-300"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        />
-                    </svg>
-                    <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-gray-100">
-                        Page Not Available
-                    </h3>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        The maintenance page is currently unavailable. Please check back later.
-                    </p>
-                    <div className="mt-6">
-                        <a
-                            href="/dashboard"
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                            Return to Dashboard
-                        </a>
+            
+            <div className="p-4 sm:p-6 space-y-6">
+                <div className="space-y-1">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle className="text-2xl font-semibold tracking-tight">Annual Calibration Management</CardTitle>
+                            <CardDescription className="mt-1">
+                                Efficiently plan, track, and manage your annual equipment calibration program to ensure accuracy, compliance, and operational reliability.
+                            </CardDescription>
+                        </div>
+                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button>Add Calibration</Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Add New Calibration</DialogTitle>
+                                </DialogHeader>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div>
+                                        <label htmlFor="instrument_name_or_eq_code" className="block text-sm font-medium mb-1">
+                                            Instrument Name/Eq. Code
+                                        </label>
+                                        <Input
+                                            id="instrument_name_or_eq_code"
+                                            name="instrument_name_or_eq_code"
+                                            value={formData.instrument_name_or_eq_code}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="issued_to" className="block text-sm font-medium mb-1">
+                                            Issued To
+                                        </label>
+                                        <Input
+                                            id="issued_to"
+                                            name="issued_to"
+                                            value={formData.issued_to}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="freq_of_cal" className="block text-sm font-medium mb-1">
+                                            Frequency of Calibration
+                                        </label>
+                                        <Input
+                                            id="freq_of_cal"
+                                            name="freq_of_cal"
+                                            value={formData.freq_of_cal}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                    <div className="flex justify-end space-x-2">
+                                        <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                                            Cancel
+                                        </Button>
+                                        <Button type="submit">
+                                            Save
+                                        </Button>
+                                    </div>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
+
+                <div className="rounded-md border bg-white shadow-sm overflow-x-auto">
+                    <Table className="min-w-full">
+                        <TableHeader>
+                            <TableRow className="bg-gray-50">
+                                <TableHead className="w-[200px] font-semibold border-r">Instrument Name/Eq.Code</TableHead>
+                                <TableHead className="w-[120px] font-semibold border-r">Issued to</TableHead>
+                                <TableHead className="w-[180px] font-semibold border-r">Frequency of Calibration</TableHead>
+                                <TableHead className="w-[80px] font-semibold border-r">Status</TableHead>
+                                {months.map(month => (
+                                    <TableHead key={month} className="w-[60px] font-semibold text-center border-r">
+                                        {month.charAt(0).toUpperCase() + month.slice(1)}
+                                    </TableHead>
+                                ))}
+                                <TableHead className="w-[80px] font-semibold border-r">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {calibrations.length > 0 ? (
+                                calibrations.map((calibration) => (
+                                    <>
+                                        {/* Main row with instrument info */}
+                                        <TableRow key={`${calibration.id}-main`} className="hover:bg-gray-50">
+                                            <TableCell className="font-medium border-r" rowSpan={3}>
+                                                {calibration.instrument_name_or_eq_code}
+                                            </TableCell>
+                                            <TableCell className="border-r" rowSpan={3}>
+                                                {calibration.issued_to}
+                                            </TableCell>
+                                            <TableCell className="border-r" rowSpan={3}>
+                                                {calibration.freq_of_cal}
+                                            </TableCell>
+                                            <TableCell className="text-xs border-r bg-gray-50">
+                                                <Button 
+                                                    variant="link" 
+                                                    className="h-4 p-0 text-xs"
+                                                    onClick={() => openStatusDialog(calibration, 'planned')}
+                                                >
+                                                    Planned
+                                                </Button>
+                                            </TableCell>
+                                            {months.map(month => (
+                                                <TableCell 
+                                                    key={`${calibration.id}-planned-${month}`} 
+                                                    className="text-center border-r"
+                                                >
+                                                    {getMonthValue(calibration, 'planned', month)}
+                                                </TableCell>
+                                            ))}
+                                            <TableCell className="border-r" rowSpan={3}>
+                                                <div className="flex space-x-2">
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        onClick={() => openEditDialog(calibration)}
+                                                    >
+                                                        <Edit className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        onClick={() => handleDelete(calibration.id)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4 text-red-500" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                        
+                                        {/* Actual row */}
+                                        <TableRow key={`${calibration.id}-actual`} className="hover:bg-gray-50">
+                                            <TableCell className="text-xs border-r bg-gray-50">
+                                                <Button 
+                                                    variant="link" 
+                                                    className="h-4 p-0 text-xs"
+                                                    onClick={() => openStatusDialog(calibration, 'actual')}
+                                                >
+                                                    Actual
+                                                </Button>
+                                            </TableCell>
+                                            {months.map(month => (
+                                                <TableCell 
+                                                    key={`${calibration.id}-actual-${month}`} 
+                                                    className="text-center border-r"
+                                                >
+                                                    {getMonthValue(calibration, 'actual', month)}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                        
+                                        {/* Remarks row */}
+                                        <TableRow key={`${calibration.id}-remarks`} className="hover:bg-gray-50 border-b-2">
+                                            <TableCell className="text-xs border-r bg-gray-50">
+                                                <Button 
+                                                    variant="link" 
+                                                    className="h-4 p-0 text-xs"
+                                                    onClick={() => openStatusDialog(calibration, 'remarks')}
+                                                >
+                                                    Remarks
+                                                </Button>
+                                            </TableCell>
+                                            {months.map(month => (
+                                                <TableCell 
+                                                    key={`${calibration.id}-remarks-${month}`} 
+                                                    className="text-center border-r"
+                                                >
+                                                    {getMonthValue(calibration, 'remarks', month)}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    </>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={16} className="text-center py-4">
+                                        No calibration records found
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
+
+            {/* Status Update Dialog */}
+            <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>
+                            Update {currentField === 'planned' ? 'Planned' : 
+                                  currentField === 'actual' ? 'Actual' : 'Remarks'} Status
+                        </DialogTitle>
+                    </DialogHeader>
+                    
+                    <div className="grid gap-4 py-4">
+                        <div>
+                            <Label className="mb-2 block">Select Months</Label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {months.map(month => (
+                                    <div key={month} className="flex items-center space-x-2">
+                                        <Checkbox 
+                                            id={`month-${month}`}
+                                            checked={selectedMonths[month] || false}
+                                            onCheckedChange={() => toggleMonthSelection(month)}
+                                        />
+                                        <label htmlFor={`month-${month}`} className="text-sm font-medium leading-none">
+                                            {month.charAt(0).toUpperCase() + month.slice(1)}
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {currentField !== 'remarks' ? (
+                            <div>
+                                <Label htmlFor="status-value" className="mb-2 block">
+                                    {currentField === 'planned' ? 'Planned Status' : 'Actual Status'}
+                                </Label>
+                                <Input
+                                    id="status-value"
+                                    value={statusValue}
+                                    onChange={(e) => setStatusValue(e.target.value)}
+                                    placeholder="Enter status"
+                                />
+                            </div>
+                        ) : (
+                            <div>
+                                <Label htmlFor="remarks-value" className="mb-2 block">
+                                    Remarks
+                                </Label>
+                                <Input
+                                    id="remarks-value"
+                                    value={remarksValue}
+                                    onChange={(e) => setRemarksValue(e.target.value)}
+                                    placeholder="Enter remarks"
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    <DialogFooter>
+                        <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={() => setIsStatusDialogOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button 
+                            type="button" 
+                            onClick={handleStatusSubmit}
+                            disabled={
+                                (currentField !== 'remarks' && !statusValue) || 
+                                (currentField === 'remarks' && !remarksValue) ||
+                                Object.values(selectedMonths).filter(Boolean).length === 0
+                            }
+                        >
+                            Update
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Dialog */}
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit Calibration</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleEditSubmit} className="space-y-4">
+                        <div>
+                            <label htmlFor="edit-instrument_name_or_eq_code" className="block text-sm font-medium mb-1">
+                                Instrument Name/Eq. Code
+                            </label>
+                            <Input
+                                id="edit-instrument_name_or_eq_code"
+                                name="instrument_name_or_eq_code"
+                                value={formData.instrument_name_or_eq_code}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="edit-issued_to" className="block text-sm font-medium mb-1">
+                                Issued To
+                            </label>
+                            <Input
+                                id="edit-issued_to"
+                                name="issued_to"
+                                value={formData.issued_to}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="edit-freq_of_cal" className="block text-sm font-medium mb-1">
+                                Frequency of Calibration
+                            </label>
+                            <Input
+                                id="edit-freq_of_cal"
+                                name="freq_of_cal"
+                                value={formData.freq_of_cal}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                            <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button type="submit">
+                                Save Changes
+                            </Button>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }
