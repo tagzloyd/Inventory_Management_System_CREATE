@@ -8,12 +8,11 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::table('inventory_category', function (Blueprint $table) {
-            // First drop existing foreign keys
-            $table->dropForeign(['inventory_id']);
-            $table->dropForeign(['category_id']);
+        Schema::create('inventory_category', function (Blueprint $table) {
+            $table->unsignedBigInteger('inventory_id');
+            $table->unsignedBigInteger('category_id');
             
-            // Then recreate with cascade
+            // Add foreign keys with cascade
             $table->foreign('inventory_id')
                   ->references('id')
                   ->on('inventory')
@@ -23,23 +22,14 @@ return new class extends Migration
                   ->references('id')
                   ->on('categories')
                   ->onDelete('cascade');
+                  
+            // Set composite primary key
+            $table->primary(['inventory_id', 'category_id']);
         });
     }
 
     public function down()
     {
-        Schema::table('inventory_category', function (Blueprint $table) {
-            // Reverse the changes if needed
-            $table->dropForeign(['inventory_id']);
-            $table->dropForeign(['category_id']);
-            
-            $table->foreign('inventory_id')
-                  ->references('id')
-                  ->on('inventory');
-                  
-            $table->foreign('category_id')
-                  ->references('id')
-                  ->on('categories');
-        });
+        Schema::dropIfExists('inventory_category');
     }
 };
