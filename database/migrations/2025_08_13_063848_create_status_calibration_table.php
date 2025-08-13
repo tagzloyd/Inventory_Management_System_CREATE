@@ -13,7 +13,7 @@ return new class extends Migration
     {
          Schema::create('planned', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('cal_id')->constraint('calibration');
+                $table->foreignId('cal_id')->constrainted('calibration');
                 $table->string('jan')->nullable();
                 $table->string('feb')->nullable();
                 $table->string('mar')->nullable();
