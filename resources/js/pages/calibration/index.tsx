@@ -16,7 +16,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Trash2, Edit, Download, FileText, FileSpreadsheet } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 
 const breadcrumbs = [
     { title: 'Inventory Management', href: '/dashboard' },
@@ -706,7 +706,7 @@ const printReport = () => {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Calibration" />
-            
+            <Toaster position="top-right" richColors />
             <div className="p-4 sm:p-6 space-y-6">
                 <div className="space-y-1">
                     <div className="flex justify-between items-center">
