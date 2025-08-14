@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Trash2, Edit } from 'lucide-react';
+import { Trash2, Edit, Download, FileText, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
 
 const breadcrumbs = [
@@ -90,6 +90,8 @@ export default function Calibration() {
     const [selectedMonths, setSelectedMonths] = useState<Record<string, boolean>>({});
     const [statusValue, setStatusValue] = useState('');
     const [remarksValue, setRemarksValue] = useState('');
+
+    const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
     useEffect(() => {
         fetchCalibrations();
@@ -277,7 +279,6 @@ export default function Calibration() {
         setIsStatusDialogOpen(true);
         
         const initialSelected: Record<string, boolean> = {};
-        const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
         months.forEach(month => {
             initialSelected[month] = false;
         });
@@ -310,15 +311,397 @@ export default function Calibration() {
         }
     };
 
-    const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-
     const getMonthValue = (calibration: Calibration, field: 'planned' | 'actual' | 'remarks', month: string): string => {
         const fieldData = calibration[field];
-        if (!fieldData) return '-';
+        if (!fieldData) return '';
         
         const monthValue = fieldData[month as keyof typeof fieldData];
-        return monthValue !== null && monthValue !== undefined ? String(monthValue) : '-';
+        return monthValue !== null && monthValue !== undefined ? String(monthValue) : '';
     };
+
+    const exportCSV = () => {
+  if (calibrations.length === 0) {
+    toast.warning('No calibration data to export');
+    return;
+  }
+
+  const headerStyle = `
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+      }
+      th {
+        background-color: #1a5fb4;
+        color: white;
+        font-weight: bold;
+        text-align: center;
+        padding: 8px;
+        border: 1px solid #0b4491;
+        font-size: 11px;
+      }
+      td {
+        padding: 8px;
+        border: 1px solid #e5e7eb;
+        text-align: center;
+        font-size: 11px;
+      }
+      .instrument-cell {
+        font-weight: bold;
+        text-align: left;
+        background: white !important;
+        border-left: 1px solid #e5e7eb !important;
+      }
+      .info-cell {
+        background: white !important;
+      }
+      .planned-header {
+        background: #dbeafe !important;
+        color: #1d4ed8;
+        font-weight: bold;
+      }
+      .actual-header {
+        background: #dcfce7 !important;
+        color: #166534;
+        font-weight: bold;
+      }
+      .remarks-header {
+        background: #fef9c3 !important;
+        color: #713f12;
+        font-weight: bold;
+      }
+      .planned-data {
+        color: #1d4ed8;
+        background-color: #eff6ff;
+      }
+      .actual-data {
+        color: #166534;
+        background-color: #ecfdf5;
+      }
+      .remarks-data {
+        color: #713f12;
+        background-color: #fefce8;
+      }
+      .alt-row td {
+        background-color: #f8fafc;
+      }
+      .title-row {
+        font-size: 16px;
+        font-weight: bold;
+        color: #1e293b;
+        padding: 10px 0;
+      }
+      .subtitle-row {
+        font-size: 11px;
+        color: #64748b;
+        padding: 5px 0;
+      }
+    </style>
+  `;
+
+  let excelContent = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+          xmlns:x="urn:schemas-microsoft-com:office:excel" 
+          xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      ${headerStyle}
+      <!--[if gte mso 9]>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>Calibration Report</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
+      <![endif]-->
+    </head>
+    <body>
+      <table>
+        <tr>
+          <td colspan="${months.length + 4}" class="title-row">
+            Annual Calibration Report - Caraga State University
+          </td>
+        </tr>
+        <tr>
+          <td colspan="${months.length + 4}" class="subtitle-row">
+            Generated on: ${new Date().toLocaleString()}
+          </td>
+        </tr>
+        <tr>
+          <th style="width: 200px; text-align: left;">Instrument Name/Eq.Code</th>
+          <th style="width: 120px;">Issued To</th>
+          <th style="width: 100px;">Frequency</th>
+          <th style="width: 80px;">Status</th>
+          ${months.map(month => 
+            `<th style="width: 60px;">${month.charAt(0).toUpperCase() + month.slice(1)}</th>`
+          ).join('')}
+        </tr>
+  `;
+
+  calibrations.forEach((calibration, index) => {
+    const rowClass = index % 2 === 0 ? '' : 'class="alt-row"';
+    
+    excelContent += `
+      <tr ${rowClass}>
+        <td class="instrument-cell" rowspan="3">${calibration.instrument_name_or_eq_code}</td>
+        <td class="info-cell" rowspan="3">${calibration.issued_to || '-'}</td>
+        <td class="info-cell" rowspan="3">${calibration.freq_of_cal || '-'}</td>
+        <td class="planned-header">Planned</td>
+        ${months.map(month => 
+          `<td class="planned-data">${getMonthValue(calibration, 'planned', month)}</td>`
+        ).join('')}
+      </tr>
+      
+      <tr ${rowClass}>
+        <td class="actual-header">Actual</td>
+        ${months.map(month => 
+          `<td class="actual-data">${getMonthValue(calibration, 'actual', month)}</td>`
+        ).join('')}
+      </tr>
+      
+      <tr ${rowClass}>
+        <td class="remarks-header">Remarks</td>
+        ${months.map(month => 
+          `<td class="remarks-data">${getMonthValue(calibration, 'remarks', month)}</td>`
+        ).join('')}
+      </tr>
+    `;
+  });
+
+  excelContent += `
+      </table>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `CSU_Calibration_Report_${new Date().toISOString().split('T')[0]}.xls`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  toast.success('Excel export completed');
+};
+
+const printReport = () => {
+  if (calibrations.length === 0) {
+    toast.warning('No calibration data to print');
+    return;
+  }
+
+  const printWindow = window.open('', '', 'width=1200,height=800');
+  if (!printWindow) {
+    toast.error('Popup was blocked. Please allow popups for this site.');
+    return;
+  }
+
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Annual Calibration Report</title>
+        <style>
+          @page {
+            size: A4 landscape;
+            margin: 15mm;
+          }
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #1e293b;
+            font-size: 12px;
+            line-height: 1.4;
+          }
+          .report-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+          }
+          .report-title {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+          }
+          .report-subtitle {
+            margin: 4px 0 0;
+            font-size: 13px;
+            color: #64748b;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0 20px;
+            font-size: 11px;
+            page-break-inside: avoid;
+          }
+          th {
+            background-color: #1a5fb4;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            padding: 8px;
+            border: 1px solid #0b4491;
+          }
+          td {
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+          }
+          .instrument-cell {
+            font-weight: bold;
+            text-align: left;
+            background: white !important;
+            border-left: 1px solid #e5e7eb !important;
+          }
+          .info-cell {
+            background: white !important;
+          }
+          .planned-header {
+            background: #dbeafe !important;
+            color: #1d4ed8;
+            font-weight: bold;
+          }
+          .actual-header {
+            background: #dcfce7 !important;
+            color: #166534;
+            font-weight: bold;
+          }
+          .remarks-header {
+            background: #fef9c3 !important;
+            color: #713f12;
+            font-weight: bold;
+          }
+          .planned-data {
+            color: #1d4ed8;
+            background-color: #eff6ff;
+          }
+          .actual-data {
+            color: #166534;
+            background-color: #ecfdf5;
+          }
+          .remarks-data {
+            color: #713f12;
+            background-color: #fefce8;
+          }
+          .alt-row td {
+            background-color: #f8fafc;
+          }
+          .footer {
+            text-align: right;
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+          }
+          .signature-line {
+            display: inline-block;
+            width: 150px;
+            border-top: 1px solid #94a3b8;
+            margin: 30px 0 5px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="report-header">
+          <h1 class="report-title">Annual Calibration Report</h1>
+          <p class="report-subtitle">
+            <strong>Caraga State University</strong><br>
+            Generated on ${currentDate} | ${calibrations.length} instruments
+          </p>
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 200px; text-align: left;">Instrument Name/Eq.Code</th>
+              <th style="width: 120px;">Issued To</th>
+              <th style="width: 100px;">Frequency</th>
+              <th style="width: 80px;">Status</th>
+              ${months.map(month => 
+                `<th style="width: 60px;">${month.charAt(0).toUpperCase() + month.slice(1)}</th>`
+              ).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${calibrations.map((calibration, index) => {
+              const rowClass = index % 2 === 0 ? '' : 'class="alt-row"';
+              return `
+                <tr ${rowClass}>
+                  <td class="instrument-cell" rowspan="3">${calibration.instrument_name_or_eq_code}</td>
+                  <td class="info-cell" rowspan="3">${calibration.issued_to || '-'}</td>
+                  <td class="info-cell" rowspan="3">${calibration.freq_of_cal || '-'}</td>
+                  <td class="planned-header">Planned</td>
+                  ${months.map(month => 
+                    `<td class="planned-data">${getMonthValue(calibration, 'planned', month)}</td>`
+                  ).join('')}
+                </tr>
+                <tr ${rowClass}>
+                  <td class="actual-header">Actual</td>
+                  ${months.map(month => 
+                    `<td class="actual-data">${getMonthValue(calibration, 'actual', month)}</td>`
+                  ).join('')}
+                </tr>
+                <tr ${rowClass}>
+                  <td class="remarks-header">Remarks</td>
+                  ${months.map(month => 
+                    `<td class="remarks-data">${getMonthValue(calibration, 'remarks', month)}</td>`
+                  ).join('')}
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+        
+        <div class="footer">
+          <div style="margin-top: 40px;">
+            <div class="signature-line"></div>
+            <div style="font-size: 11px; color: #475569;">Prepared by: CREATE & DABE - Inventory Management</div>
+          </div>
+          <div style="margin-top: 10px;">
+            <div style="font-size: 10px; color: #64748b;">
+              Printed on: ${new Date().toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `);
+  
+  printWindow.document.close();
+  setTimeout(() => {
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  }, 500);
+  toast.success('PDF report generated successfully');
+};
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -333,60 +716,78 @@ export default function Calibration() {
                                 Efficiently plan, track, and manage your annual equipment calibration program to ensure accuracy, compliance, and operational reliability.
                             </CardDescription>
                         </div>
-                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button>Add Calibration</Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Add New Calibration</DialogTitle>
-                                </DialogHeader>
-                                <form onSubmit={handleSubmit} className="space-y-4">
-                                    <div>
-                                        <label htmlFor="instrument_name_or_eq_code" className="block text-sm font-medium mb-1">
-                                            Instrument Name/Eq. Code
-                                        </label>
-                                        <Input
-                                            id="instrument_name_or_eq_code"
-                                            name="instrument_name_or_eq_code"
-                                            value={formData.instrument_name_or_eq_code}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="issued_to" className="block text-sm font-medium mb-1">
-                                            Issued To
-                                        </label>
-                                        <Input
-                                            id="issued_to"
-                                            name="issued_to"
-                                            value={formData.issued_to}
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="freq_of_cal" className="block text-sm font-medium mb-1">
-                                            Frequency of Calibration
-                                        </label>
-                                        <Input
-                                            id="freq_of_cal"
-                                            name="freq_of_cal"
-                                            value={formData.freq_of_cal}
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
-                                    <div className="flex justify-end space-x-2">
-                                        <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                            Cancel
-                                        </Button>
-                                        <Button type="submit">
-                                            Save
-                                        </Button>
-                                    </div>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
+                        <div className="flex gap-2">
+                            <Button 
+                                variant="outline" 
+                                onClick={exportCSV}
+                                disabled={calibrations.length === 0}
+                            >
+                                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                                Export Excel
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                onClick={printReport}
+                                disabled={calibrations.length === 0}
+                            >
+                                <FileText className="mr-2 h-4 w-4" />
+                                Export PDF
+                            </Button>
+                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button>Add Calibration</Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Add New Calibration</DialogTitle>
+                                    </DialogHeader>
+                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                        <div>
+                                            <label htmlFor="instrument_name_or_eq_code" className="block text-sm font-medium mb-1">
+                                                Instrument Name/Eq. Code
+                                            </label>
+                                            <Input
+                                                id="instrument_name_or_eq_code"
+                                                name="instrument_name_or_eq_code"
+                                                value={formData.instrument_name_or_eq_code}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="issued_to" className="block text-sm font-medium mb-1">
+                                                Issued To
+                                            </label>
+                                            <Input
+                                                id="issued_to"
+                                                name="issued_to"
+                                                value={formData.issued_to}
+                                                onChange={handleInputChange}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="freq_of_cal" className="block text-sm font-medium mb-1">
+                                                Frequency of Calibration
+                                            </label>
+                                            <Input
+                                                id="freq_of_cal"
+                                                name="freq_of_cal"
+                                                value={formData.freq_of_cal}
+                                                onChange={handleInputChange}
+                                            />
+                                        </div>
+                                        <div className="flex justify-end space-x-2">
+                                            <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit">
+                                                Save
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     </div>
                 </div>
 
