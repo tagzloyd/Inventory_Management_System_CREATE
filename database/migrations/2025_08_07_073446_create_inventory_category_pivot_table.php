@@ -25,6 +25,8 @@ return new class extends Migration
                   
             // Set composite primary key
             $table->primary(['inventory_id', 'category_id']);
+            // Add timestamps
+            $table->timestamps();
         });
     }
 

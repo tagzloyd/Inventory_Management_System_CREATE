@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('inventory', function (Blueprint $table) {
             $table->id();
             $table->string('equipment_name');
-            $table->string('serial_number')->nullable();
+            $table->string('serial_number')->nullable();    
             $table->string('date_acquired')->nullable();
             $table->text('notes')->nullable();
             $table->string('remarks')->default('Functional');

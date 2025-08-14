@@ -13,9 +13,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Clear existing users
+        // Disable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        
+        // Clear existing tables
         DB::table('users')->truncate();
+        DB::table('categories')->truncate();
+        DB::table('offices')->truncate();
+        DB::table('faculty')->truncate();
+        DB::table('inventory')->truncate();
+        DB::table('inventory_category')->truncate();
 
+        // Re-enable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        
         // Insert users directly
         DB::table('users')->insert([
             [
@@ -36,170 +47,48 @@ class DatabaseSeeder extends Seeder
             ]
         ]);
 
-        // Clear existing categories
-        DB::table('categories')->truncate();
         // Insert categories directly
         DB::table('categories')->insert([
-            [
-                'name' => 'AB Power Engineering',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Renewable Energy for AB Applications',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'AB Machinery and Mechanization',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Machine Design for AB Production',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'AB Structures and Environment Engineering',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Plant and Livestock Environmental Engineering',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'AB Electrification and Control Systems',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'AB Waste Engineering',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Hydrometeorology',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Irrigation and Drainage Engineering',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Land and Water Conservation Engineering',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Aquaculture Engineering',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Properties of AB Materials',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'AB Products Processing and Storage',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Food Process Engineering',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Design and Management of AB Processing Systems',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Other Materials/ Equipments Available in DABE',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
+            ['id' => 1, 'name' => 'AB Power Engineering', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 2, 'name' => 'Renewable Energy for AB Applications', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 3, 'name' => 'AB Machinery and Mechanization', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 4, 'name' => 'Machine Design for AB Production', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 5, 'name' => 'AB Structures and Environment Engineering', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 6, 'name' => 'Plant and Livestock Environmental Engineering', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 7, 'name' => 'AB Electrification and Control Systems', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 8, 'name' => 'AB Waste Engineering', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 9, 'name' => 'Hydrometeorology', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 10, 'name' => 'Irrigation and Drainage Engineering', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 11, 'name' => 'Land and Water Conservation Engineering', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 12, 'name' => 'Aquaculture Engineering', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 13, 'name' => 'Properties of AB Materials', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 14, 'name' => 'AB Products Processing and Storage', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 15, 'name' => 'Food Process Engineering', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 16, 'name' => 'Design and Management of AB Processing Systems', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 17, 'name' => 'Other Materials/ Equipments Available in DABE', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        // Clear existing offices
-        DB::table('offices')->truncate();
         // Insert offices directly
         DB::table('offices')->insert([
-            [
-                'office_name' => 'Old Farm Mech Laboratory',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'office_name' => 'Create',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'office_name' => 'New Farm Mech Building',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'office_name' => 'DABE',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'office_name' => 'CSU-ORGMS Production Area',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'office_name'=> 'Hinang 101/Geomatics Lab/CREATE Center',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'office_name' => 'Hinang 109(Bioprocessing Lab)',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'office_name' => 'Hinang 307/ Drawing Room',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'office_name' => 'Hinang 301',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'office_name' => 'Hinang 101',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'office_name' => 'Geomatics Lab',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'office_name' => 'GE Dept.',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
+            ['office_name' => 'Old Farm Mech Laboratory', 'created_at' => now(), 'updated_at' => now()],
+            ['office_name' => 'Create', 'created_at' => now(), 'updated_at' => now()],
+            ['office_name' => 'New Farm Mech Building', 'created_at' => now(), 'updated_at' => now()],
+            ['office_name' => 'DABE', 'created_at' => now(), 'updated_at' => now()],
+            ['office_name' => 'CSU-ORGMS Production Area', 'created_at' => now(), 'updated_at' => now()],
+            ['office_name'=> 'Hinang 101/Geomatics Lab/CREATE Center', 'created_at' => now(), 'updated_at' => now()],
+            ['office_name' => 'Hinang 109(Bioprocessing Lab)', 'created_at' => now(), 'updated_at' => now()],
+            ['office_name' => 'Hinang 307/ Drawing Room', 'created_at' => now(), 'updated_at' => now()],
+            ['office_name' => 'Hinang 301', 'created_at' => now(), 'updated_at' => now()],
+            ['office_name' => 'Hinang 101', 'created_at' => now(), 'updated_at' => now()],
+            ['office_name' => 'Geomatics Lab', 'created_at' => now(), 'updated_at' => now()],
+            ['office_name' => 'GE Dept.', 'created_at' => now(), 'updated_at' => now()]
         ]);
 
-        //Clear existing faculty
-        DB::table('faculty')->truncate();
         // Insert faculty members directly
         DB::table('faculty')->insert([
             [
                 'name' => 'Others',
-                'office_id' => 1, // Old Farm Mech Laboratory
+                'office_id' => 1, 
                 'email' => null,
                 'phone' => null,
                 'created_at' => now(),
@@ -263,9 +152,7 @@ class DatabaseSeeder extends Seeder
             ]
         ]);
 
-        // Clear existing inventory
-        DB::table('inventory')->truncate();
-        // Insert inventory items directly
+        // Insert inventory items directly (without category_id)
         DB::table('inventory')->insert([
             [
                 'id' => 1,
@@ -274,7 +161,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 1,
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -287,7 +173,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 1,
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -300,7 +185,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 1,
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -313,7 +197,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 1,
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -326,7 +209,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 1,
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -339,7 +221,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Non-Functional',
-                'category_id' => 1,
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -352,7 +233,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Non-Functional',
-                'category_id' => 1,
                 'office_id' => 2,
                 'faculty_id' => 2,
                 'created_at' => now(),
@@ -365,7 +245,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 1,
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -378,7 +257,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 1,
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -391,7 +269,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 1,
                 'office_id' => 5,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -404,7 +281,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 1,
                 'office_id' => 3,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -417,7 +293,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 1,
                 'office_id' => 3,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -430,7 +305,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 2,
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -443,7 +317,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 2,
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -456,7 +329,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 2,
                 'office_id' => 10,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -469,7 +341,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => '06/25/23',
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 2,
                 'office_id' => 4,
                 'faculty_id' => 3,
                 'created_at' => now(),
@@ -482,7 +353,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 2,
                 'office_id' => 10,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -495,7 +365,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 2,
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -508,7 +377,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 2,
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -521,7 +389,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 2,
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -534,7 +401,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 2,
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -547,7 +413,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 2,
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -560,7 +425,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 2,
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -573,7 +437,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 2,
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -586,7 +449,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 3,
                 'office_id' => 1,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -599,7 +461,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 3,
                 'office_id' => 2,
                 'faculty_id' => 1,
                 'created_at' => now(),
@@ -612,7 +473,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => '6/26/2002',
                 'notes' => '09/10/2024 - Found at CREATE',
                 'remarks' => 'Functional',
-                'category_id' => 2,
                 'office_id' => 4,
                 'faculty_id' => 3,
                 'created_at' => now(),
@@ -625,7 +485,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => '01/14/2021',
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 10,
                 'office_id' => 7,
                 'faculty_id' => 3,
                 'created_at' => now(),
@@ -638,7 +497,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => '06/26/20',
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 15,
                 'office_id' => 2,
                 'faculty_id' => 3,
                 'created_at' => now(),
@@ -651,7 +509,6 @@ class DatabaseSeeder extends Seeder
                 'date_acquired' => null,
                 'notes' => null,
                 'remarks' => 'Functional',
-                'category_id' => 17,
                 'office_id' => 2,
                 'faculty_id' => 3,
                 'created_at' => now(),
@@ -659,9 +516,7 @@ class DatabaseSeeder extends Seeder
             ]
         ]);
 
-        // Clear existing inventory category
-        DB::table('inventory_category')->truncate();
-        // Insert inventory categories directly
+        // Insert inventory categories directly (pivot table)
         DB::table('inventory_category')->insert([
             ['inventory_id' => 1, 'category_id' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['inventory_id' => 1, 'category_id' => 3, 'created_at' => now(), 'updated_at' => now()],
@@ -701,4 +556,4 @@ class DatabaseSeeder extends Seeder
             ['inventory_id' => 31, 'category_id' => 17, 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
-}
+};
