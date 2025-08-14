@@ -23,25 +23,25 @@ class DatabaseSeeder extends Seeder
         // DB::table('inventory_category')->truncate();
 
         
-        // // Insert users directly
-        // DB::table('users')->insert([
-        //     [
-        //         'name' => 'Admin',
-        //         'email' => 'admin@carsu.edu.ph',
-        //         'password' => Hash::make('Create-Admin'),
-        //         'email_verified_at' => now(),
-        //         'created_at' => now(),
-        //         'updated_at' => now(),
-        //     ],
-        //     [
-        //         'name' => 'Loyd N. Tagaro',
-        //         'email' => 'loydtagaro1@gmail.com',
-        //         'password' => Hash::make('Tagaro-07'),
-        //         'email_verified_at' => now(),
-        //         'created_at' => now(),
-        //         'updated_at' => now(),
-        //     ]
-        // ]);
+        // Insert users directly
+        DB::table('users')->insert([
+            [
+                'name' => 'Admin',
+                'email' => 'admin@carsu.edu.ph',
+                'password' => Hash::make('Create-Admin'),
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Loyd N. Tagaro',
+                'email' => 'loydtagaro1@gmail.com',
+                'password' => Hash::make('Tagaro-07'),
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        ]);
 
         // // Insert categories directly
         // DB::table('categories')->insert([
