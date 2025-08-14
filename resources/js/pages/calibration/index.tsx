@@ -16,6 +16,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Trash2, Edit } from 'lucide-react';
+import { toast } from 'sonner';
 
 const breadcrumbs = [
     { title: 'Inventory Management', href: '/dashboard' },
@@ -95,8 +96,12 @@ export default function Calibration() {
     }, []);
 
     const fetchCalibrations = async () => {
+        const toastId = toast.loading('Loading calibration data...');
         try {
             const response = await fetch('/api/calibration/fetch');
+            if (!response.ok) {
+                throw new Error('Failed to fetch calibrations');
+            }
             const data = await response.json();
             
             const transformedData = data.map((cal: any) => ({
@@ -107,8 +112,10 @@ export default function Calibration() {
             }));
             
             setCalibrations(transformedData);
+            toast.success('Calibration data loaded successfully', { id: toastId });
         } catch (error) {
             console.error('Error fetching calibrations:', error);
+            toast.error('Failed to load calibration data. Please try again.', { id: toastId });
         }
     };
 
@@ -122,6 +129,7 @@ export default function Calibration() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const toastId = toast.loading('Creating calibration record...');
         try {
             const response = await fetch('/api/calibration', {
                 method: 'POST',
@@ -134,17 +142,20 @@ export default function Calibration() {
             });
 
             if (response.ok) {
-                const newCalibration = await response.json();
-                setCalibrations(prev => [...prev, newCalibration]);
+                await fetchCalibrations();
                 setFormData({
                     instrument_name_or_eq_code: '',
                     issued_to: '',
                     freq_of_cal: ''
                 });
                 setIsDialogOpen(false);
+                toast.success('Calibration record created successfully', { id: toastId });
+            } else {
+                throw new Error('Failed to create calibration');
             }
         } catch (error) {
             console.error('Error creating calibration:', error);
+            toast.error('Failed to create calibration record', { id: toastId });
         }
     };
 
@@ -152,6 +163,7 @@ export default function Calibration() {
         e.preventDefault();
         if (!currentCalibration) return;
 
+        const toastId = toast.loading('Updating calibration record...');
         try {
             const response = await fetch(`/api/calibration/${currentCalibration.id}`, {
                 method: 'PUT',
@@ -164,20 +176,22 @@ export default function Calibration() {
             });
 
             if (response.ok) {
-                const updatedCalibration = await response.json();
-                setCalibrations(prev => prev.map(cal => 
-                    cal.id === currentCalibration.id ? updatedCalibration : cal
-                ));
+                await fetchCalibrations();
                 setIsEditDialogOpen(false);
+                toast.success('Calibration updated successfully', { id: toastId });
+            } else {
+                throw new Error('Failed to update calibration');
             }
         } catch (error) {
             console.error('Error updating calibration:', error);
+            toast.error('Failed to update calibration record', { id: toastId });
         }
     };
 
     const handleDelete = async (id: number) => {
         if (!confirm('Are you sure you want to delete this calibration record?')) return;
         
+        const toastId = toast.loading('Deleting calibration record...');
         try {
             const response = await fetch(`/api/calibration/${id}`, {
                 method: 'DELETE',
@@ -187,10 +201,14 @@ export default function Calibration() {
             });
 
             if (response.ok) {
-                setCalibrations(prev => prev.filter(cal => cal.id !== id));
+                await fetchCalibrations();
+                toast.success('Calibration record deleted successfully', { id: toastId });
+            } else {
+                throw new Error('Failed to delete calibration');
             }
         } catch (error) {
             console.error('Error deleting calibration:', error);
+            toast.error('Failed to delete calibration record', { id: toastId });
         }
     };
 
@@ -210,6 +228,7 @@ export default function Calibration() {
         field: 'planned' | 'actual' | 'remarks', 
         value: string
     ) => {
+        const toastId = toast.loading(`Updating ${field} data...`);
         try {
             const endpoint = `/api/calibration/${field}`;
             const data: any = {
@@ -236,22 +255,14 @@ export default function Calibration() {
             });
 
             if (response.ok) {
-                const updatedData = await response.json();
-                setCalibrations(prev => prev.map(cal => {
-                    if (cal.id === calibrationId) {
-                        return {
-                            ...cal,
-                            [field]: {
-                                ...(cal[field] || {}),
-                                ...updatedData
-                            }
-                        };
-                    }
-                    return cal;
-                }));
+                await fetchCalibrations();
+                toast.success(`${field.charAt(0).toUpperCase() + field.slice(1)} data updated successfully`, { id: toastId });
+            } else {
+                throw new Error(`Failed to update ${field} data`);
             }
         } catch (error) {
             console.error('Error updating calibration details:', error);
+            toast.error(`Failed to update ${field} data`, { id: toastId });
         } finally {
             setIsStatusDialogOpen(false);
             setSelectedMonths({});
@@ -283,7 +294,10 @@ export default function Calibration() {
     const handleStatusSubmit = () => {
         const selectedMonthNames = Object.keys(selectedMonths).filter(month => selectedMonths[month]);
         
-        if (selectedMonthNames.length === 0) return;
+        if (selectedMonthNames.length === 0) {
+            toast.warning('Please select at least one month');
+            return;
+        }
         
         const valueToUse = currentField === 'remarks' ? remarksValue : statusValue;
         if (currentCalibration) {
