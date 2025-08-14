@@ -204,7 +204,7 @@ export default function Calibration() {
 
             if (response.ok) {
                 await fetchCalibrations();
-                toast.success('Calibration record deleted successfully', { id: toastId });
+                toast.success('Calibration record and all related data deleted successfully', { id: toastId });
             } else {
                 throw new Error('Failed to delete calibration');
             }

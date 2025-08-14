@@ -132,7 +132,15 @@ class CalibrationController extends Controller
     public function destroy($id)
     {
         $calibration = Calibration::findOrFail($id);
+        
+        // Delete related records
+        $calibration->planned()->delete();
+        $calibration->actual()->delete();
+        $calibration->remarks()->delete();
+        
+        // Then delete the calibration record
         $calibration->delete();
+        
         return response()->json(null, 204);
     }
     
