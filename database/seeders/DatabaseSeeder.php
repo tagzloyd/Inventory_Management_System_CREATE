@@ -13,8 +13,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Disable foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         
         // Clear existing tables
         DB::table('users')->truncate();
@@ -24,8 +22,6 @@ class DatabaseSeeder extends Seeder
         DB::table('inventory')->truncate();
         DB::table('inventory_category')->truncate();
 
-        // Re-enable foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         
         // Insert users directly
         DB::table('users')->insert([
