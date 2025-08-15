@@ -97,7 +97,7 @@ export default function Maintenance() {
             if (editMode && currentItem) {
                 promise = axios.put(`/api/maintenance/${currentItem.id}`, formData);
             } else {
-                promise = axios.post('/api/maintenance', formData);
+                promise = axios.post('/api/maintenance/annual-preventive-maintenance', formData);
             }
 
             await toast.promise(promise, {
@@ -164,8 +164,9 @@ export default function Maintenance() {
                     }
                 },
             },
-            cancel: {
-                label: 'Cancel',
+             cancel: {
+            label: 'Cancel',
+            onClick: () => {} // Add empty onClick handler
             },
             duration: 10000,
         });
@@ -187,6 +188,36 @@ export default function Maintenance() {
     };
 
     const maintenanceFields: MaintenanceField[] = ['daily', 'weekly', 'monthly', 'quarterly', 'semi_annually', 'annually'];
+
+    // Add this interface at the top with your other types
+    interface EquipmentSummary {
+        equipment_name: string;
+        total_count: number;
+        functional_count: number;
+        non_functional_count: number;
+        defective_count: number;
+        under_repair_count: number;
+    }
+
+    // Add this to your component state
+    const [equipmentSummary, setEquipmentSummary] = useState<EquipmentSummary[]>([]);
+
+    // Add this to your useEffect to fetch the equipment data
+    useEffect(() => {
+        fetchMaintenanceItems();
+        fetchEquipmentSummary(); // Add this line
+    }, []);
+
+    // Add this function to fetch equipment data
+    const fetchEquipmentSummary = async () => {
+        try {
+            const response = await axios.get('/api/existing_equipment');
+            setEquipmentSummary(response.data);
+        } catch (err) {
+            console.error('Error fetching equipment summary:', err);
+            toast.error('Failed to load equipment summary');
+        }
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -216,7 +247,7 @@ export default function Maintenance() {
                                     Add New Maintenance
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[1500px] sm:max-h-[1500px]">
+                            <DialogContent className="sm:max-w-[1500px]">
                                 <DialogHeader>
                                     <DialogTitle>
                                         {editMode ? 'Edit Maintenance Item' : 'Add New Maintenance Item'}
@@ -284,7 +315,7 @@ export default function Maintenance() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead colSpan={6} className="text-center font-semibold text-lg border bg-gray-50">
+                                        <TableHead colSpan={7} className="text-center font-semibold text-lg border bg-gray-50">
                                             OFFICE EQUIPMENT/AIRCON UNIT/COMPUTER
                                         </TableHead>
                                     </TableRow>
@@ -303,22 +334,22 @@ export default function Maintenance() {
                                         maintenanceItems.map((item) => (
                                             <TableRow key={item.id}>
                                                 <TableCell className="border align-top whitespace-normal p-4">
-                                                    {item.daily || '-'}
+                                                    {item.daily}
                                                 </TableCell>
                                                 <TableCell className="border align-top whitespace-normal p-4">
-                                                    {item.weekly || '-'}
+                                                    {item.weekly}
                                                 </TableCell>
                                                 <TableCell className="border align-top whitespace-normal p-4">
-                                                    {item.monthly || '-'}
+                                                    {item.monthly}
                                                 </TableCell>
                                                 <TableCell className="border align-top whitespace-normal p-4">
-                                                    {item.quarterly || '-'}
+                                                    {item.quarterly}
                                                 </TableCell>
                                                 <TableCell className="border align-top whitespace-normal p-4">
-                                                    {item.semi_annually || '-'}
+                                                    {item.semi_annually}
                                                 </TableCell>
                                                 <TableCell className="border align-top whitespace-normal p-4">
-                                                    {item.annually || '-'}
+                                                    {item.annually}
                                                 </TableCell>
                                                 <TableCell className="border space-x-2">
                                                     <Button
@@ -357,7 +388,7 @@ export default function Maintenance() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead colSpan={6} className="text-left font-semibold text-lg border bg-gray-50">
+                                    <TableHead colSpan={7} className="text-left font-semibold text-lg border bg-gray-50">
                                         Based on the Inventory of ABE Equipment (As of June 2024)
                                     </TableHead>
                                 </TableRow>
@@ -367,25 +398,37 @@ export default function Maintenance() {
                                     <TableHead className="border">Update in July 2025</TableHead>
                                     <TableHead className="border">Remarks</TableHead>
                                     <TableHead className="border">Remark (Maintenance Schedule)</TableHead>
+                                    <TableHead className="border">Activities</TableHead>
                                     <TableHead className="border">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                <TableRow>
-                                    <TableCell className="border"></TableCell>
-                                    <TableCell className="border"></TableCell>
-                                    <TableCell className="border"></TableCell>
-                                    <TableCell className="border"></TableCell>
-                                    <TableCell className="border"></TableCell>
-                                    <TableCell className="border space-x-2">
-                                        <Button variant="outline" size="sm">
-                                            Edit
-                                        </Button>
-                                        <Button variant="destructive" size="sm">
-                                            Delete
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
+                                {equipmentSummary.length > 0 ? (
+                                    equipmentSummary.map((item) => (
+                                        <TableRow key={item.equipment_name}>
+                                            <TableCell className="border">{item.equipment_name}</TableCell>
+                                            <TableCell className="border"></TableCell>
+                                            <TableCell className="border text-center">{item.total_count}</TableCell>
+                                            <TableCell className="border">
+                                                {item.functional_count} functional, 
+                                                <br />
+                                                {item.non_functional_count} non-functional,
+                                                <br />
+                                                {item.defective_count} defective,
+                                                <br />
+                                                {item.under_repair_count} under repair
+                                            </TableCell>
+                                            <TableCell className="border"></TableCell>
+                                            <TableCell className="border"></TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="text-center py-4">
+                                            No equipment data available
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                             </TableBody>
                         </Table>
                     </CardContent>

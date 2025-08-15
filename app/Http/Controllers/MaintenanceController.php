@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Annual_Preventive_Maintenance;
+use Illuminate\Support\Facades\DB;
+
 
 class MaintenanceController extends Controller
 {
@@ -46,8 +48,10 @@ class MaintenanceController extends Controller
             ], 500);
         }
     }
+
     public function update(Request $request, $id)
     {
+        try {
             $maintenance = Annual_Preventive_Maintenance::findOrFail($id);
 
             $validated = $request->validate([
@@ -61,14 +65,34 @@ class MaintenanceController extends Controller
 
             $maintenance->update($validated);
 
-            return $maintenance;
+            return response()->json([
+                'success' => true,
+                'data' => $maintenance
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
-    public function destroy($id){
-        
-        $maintenance =  Annual_Preventive_Maintenance::findOrFail($id);
 
-        $maintenance -> delete();
+    public function destroy($id)
+    {
+        try {
+            $maintenance = Annual_Preventive_Maintenance::findOrFail($id);
+            $maintenance->delete();
 
-        return $maintenance;
+            return response()->json([
+                'success' => true,
+                'data' => $maintenance
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
+
 }
