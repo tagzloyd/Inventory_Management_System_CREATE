@@ -15,6 +15,8 @@ return new class extends Migration
             $table->string('date_acquired')->nullable();
             $table->text('notes')->nullable();
             $table->string('remarks')->default('Functional');
+            $table->text('maintenance_schedule')->nullable();
+            $table->text('maintenance_activities')->nullable();
             $table->foreignId('office_id')->nullable()->constrained('offices');
             $table->foreignId('faculty_id')->nullable()->constrained('faculty');
             $table->timestamps();

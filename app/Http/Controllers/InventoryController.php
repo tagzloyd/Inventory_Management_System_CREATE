@@ -51,6 +51,8 @@ class InventoryController extends Controller
                 'date_acquired' => 'nullable|string|max:255',
                 'notes' => 'nullable|string|max:1000',
                 'remarks' => 'nullable|string|max:1000',
+                'maintenance_schedule' => 'nullable|string|max:1000',
+                'maintenance_activities' => 'nullable|string|max:1000',
                 'category_ids' => 'array',
                 'category_ids.*' => 'exists:categories,id',
             ]);
@@ -72,6 +74,8 @@ class InventoryController extends Controller
             'date_acquired' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:1000',
             'remarks' => 'nullable|string|max:1000',
+            'maintenance_schedule' => 'nullable|string|max:1000',
+            'maintenance_activities' => 'nullable|string|max:1000',
             'category_ids' => 'array',
             'category_ids.*' => 'exists:categories,id',
         ]);

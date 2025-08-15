@@ -6,7 +6,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import axios from "axios";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Building2, FolderKanban, Package2, PenIcon, Trash2Icon, Check, ChevronsUpDown, MoreVertical, Wrench } from "lucide-react";
+import { Building2, FolderKanban, Package2, PenIcon, Trash2Icon, Check, ChevronsUpDown, MoreVertical, Wrench, CalendarCheck, ClipboardList } from "lucide-react";
 import { BadgeCheck, Ban } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 
 function Notification({
   message,
@@ -79,12 +80,15 @@ type InventoryItem = {
   office_id?: number;
   faculty_id?: number;
   remarks?: string;
+  maintenance_schedule?: string;
+  maintenance_activities?: string;
 };
 
 export default function InventoryIndex() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [form, setForm] = useState<Partial<InventoryItem>>({});
   const [editId, setEditId] = useState<number | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [offices, setOffices] = useState<{ id: number; office_name: string }[]>([]);
   const [faculties, setFaculties] = useState<{ id: number; name: string }[]>([]);
@@ -177,6 +181,7 @@ export default function InventoryIndex() {
       setForm({});
       setSelectedCategories([]);
       setEditId(null);
+      setIsEditing(false);
       setShowModal(false);
       fetchInventory();
     } catch (err: any) {
@@ -194,6 +199,19 @@ export default function InventoryIndex() {
       faculty_id: item.faculty?.id ?? item.faculty_id,
     });
     setSelectedCategories(item.categories || []);
+    setIsEditing(true);
+    setShowModal(true);
+  };
+
+  const handleViewDetails = (item: InventoryItem) => {
+    setEditId(item.id);
+    setForm({
+      ...item,
+      office_id: item.office?.id ?? item.office_id,
+      faculty_id: item.faculty?.id ?? item.faculty_id,
+    });
+    setSelectedCategories(item.categories || []);
+    setIsEditing(false);
     setShowModal(true);
   };
 
@@ -232,6 +250,8 @@ export default function InventoryIndex() {
       (item.notes?.toLowerCase().includes(searchTerm) || false) ||
       (item.date_acquired?.toLowerCase().includes(searchTerm) || false) ||
       (item.remarks?.toLowerCase().includes(searchTerm) || false) ||
+      (item.maintenance_schedule?.toLowerCase().includes(searchTerm) || false) ||
+      (item.maintenance_activities?.toLowerCase().includes(searchTerm) || false) ||
       (item.office?.office_name.toLowerCase().includes(searchTerm) || false) ||
       (item.faculty?.name.toLowerCase().includes(searchTerm) || false) ||
       (item.categories?.some(cat => cat.name.toLowerCase().includes(searchTerm)) || false)
@@ -261,6 +281,7 @@ export default function InventoryIndex() {
                   setEditId(null); 
                   setForm({}); 
                   setSelectedCategories([]); 
+                  setIsEditing(true);
                 }}
                 className="gap-2"
               >
@@ -298,6 +319,7 @@ export default function InventoryIndex() {
                       <TableHead>Location</TableHead>
                       <TableHead className="w-[120px]">Date Acquired</TableHead>
                       <TableHead className="w-[120px]">Status</TableHead>
+                      <TableHead className="w-[150px]">Maintenance</TableHead>
                       <TableHead className="text-right w-[50px]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -310,12 +332,13 @@ export default function InventoryIndex() {
                           <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
                           <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
                           <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
                           <TableCell><Skeleton className="h-4 w-[30px]" /></TableCell>
                         </TableRow>
                       ))
                     ) : pagedData.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                        <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
                           No inventory items found.
                         </TableCell>
                       </TableRow>
@@ -409,6 +432,25 @@ export default function InventoryIndex() {
                               )}
                             </Badge>
                           </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {item.maintenance_schedule && (
+                                <Badge variant="outline" className="gap-1">
+                                  <CalendarCheck className="h-3 w-3" />
+                                  {item.maintenance_schedule}
+                                </Badge>
+                              )}
+                              {item.maintenance_activities && (
+                                <Badge variant="outline" className="gap-1">
+                                  <ClipboardList className="h-3 w-3" />
+                                  Activities
+                                </Badge>
+                              )}
+                              {!item.maintenance_schedule && !item.maintenance_activities && (
+                                <span className="text-muted-foreground text-sm">-</span>
+                              )}
+                            </div>
+                          </TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -423,6 +465,13 @@ export default function InventoryIndex() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-48">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem 
+                                  onClick={() => handleViewDetails(item)}
+                                  className="cursor-pointer"
+                                >
+                                  <FolderKanban className="mr-2 h-4 w-4" />
+                                  View Details
+                                </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={() => handleEdit(item)}
                                   className="cursor-pointer"
@@ -506,222 +555,377 @@ export default function InventoryIndex() {
         </Card>
       </div>
 
-      {/* Add/Edit Modal */}
-      <Dialog open={showModal} onOpenChange={setShowModal}>
+      {/* Add/Edit/View Modal */}
+      <Dialog open={showModal} onOpenChange={(open) => {
+        if (!open) {
+          setShowModal(false);
+          setEditId(null);
+          setForm({});
+          setSelectedCategories([]);
+          setIsEditing(false);
+        }
+      }}>
         <DialogContent className="sm:max-w-[650px]">
           <DialogHeader>
             <DialogTitle className="text-xl">
-              {editId ? "Edit Inventory Item" : "Add New Inventory Item"}
+              {editId ? (
+                isEditing ? "Edit Inventory Item" : "Inventory Details"
+              ) : "Add New Inventory Item"}
             </DialogTitle>
             <DialogDescription>
-              {editId ? "Update the equipment details below" : "Fill in the details for the new equipment"}
+              {editId ? (
+                isEditing ? "Update the equipment details below" : "View equipment details"
+              ) : "Fill in the details for the new equipment"}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Equipment Name *</label>
-                <Input
-                  value={form.equipment_name || ""}
-                  onChange={e => setForm({ ...form, equipment_name: e.target.value })}
-                  placeholder="Enter equipment name"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Categories</label>
-                <Popover open={categoriesOpen} onOpenChange={setCategoriesOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={categoriesOpen}
-                      className="w-full justify-between"
-                    >
-                      {selectedCategories.length > 0 
-                        ? `${selectedCategories.length} selected`
-                        : "Select categories..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search categories..." />
-                      <CommandEmpty>No categories found.</CommandEmpty>
-                      <CommandGroup className="max-h-60 overflow-y-auto">
-                        <ScrollArea className="h-60">
-                          {categories.map((category) => (
-                            <CommandItem
-                              key={category.id}
-                              onSelect={() => handleCategorySelect(category)}
-                              className="cursor-pointer"
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  isCategorySelected(category) ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              {category.name}
-                            </CommandItem>
-                          ))}
-                        </ScrollArea>
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <div className="flex flex-wrap gap-2">
-                  {selectedCategories.map((category) => (
-                    <Badge 
-                      key={category.id} 
-                      variant="secondary"
-                      className="flex items-center gap-1 py-1"
-                    >
-                      {category.name}
-                      <button
-                        type="button"
-                        onClick={() => handleCategorySelect(category)}
-                        className="ml-1 text-xs rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 h-4 w-4 flex items-center justify-center"
-                      >
-                        ×
-                      </button>
-                    </Badge>
-                  ))}
+          
+          {editId && !isEditing ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Equipment Name</label>
+                  <p className="mt-1 text-sm font-medium">{form.equipment_name}</p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Categories</label>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {selectedCategories.length > 0 ? (
+                      selectedCategories.map(cat => (
+                        <Badge key={cat.id} variant="secondary">{cat.name}</Badge>
+                      ))
+                    ) : (
+                      <span className="text-sm text-muted-foreground">No categories assigned</span>
+                    )}
+                  </div>
                 </div>
               </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Location</label>
+                  <p className="mt-1 text-sm">
+                    {offices.find(o => o.id === form.office_id)?.office_name || 'Not specified'}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Faculty</label>
+                  <p className="mt-1 text-sm">
+                    {faculties.find(f => f.id === form.faculty_id)?.name || 'Not specified'}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Serial Number</label>
+                  <p className="mt-1 text-sm">
+                    {form.serial_number || 'Not specified'}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Date Acquired</label>
+                  <p className="mt-1 text-sm">
+                    {form.date_acquired ? new Date(form.date_acquired).toLocaleDateString() : 'Not specified'}
+                  </p>
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Notes</label>
+                <p className="mt-1 text-sm whitespace-pre-line">
+                  {form.notes || 'No notes available'}
+                </p>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Status</label>
+                <div className="mt-1">
+                  <Badge 
+                    variant={
+                      form.remarks === "Non-Functional" ? "destructive" :
+                      form.remarks === "Defective" ? "secondary" :
+                      form.remarks === "Under Repair" ? "outline" : 
+                      "default"
+                    }
+                    className="gap-1.5"
+                  >
+                    {form.remarks === "Non-Functional" ? (
+                      <>
+                        <Ban className="h-3 w-3" />
+                        Non-Functional
+                      </>
+                    ) : form.remarks === "Defective" ? (
+                      <>
+                        <Ban className="h-3 w-3" />
+                        Defective
+                      </>
+                    ) : form.remarks === "Under Repair" ? (
+                      <>
+                        <Wrench className="h-3 w-3" />
+                        Under Repair
+                      </>
+                    ) : (
+                      <>
+                        <BadgeCheck className="h-3 w-3" />
+                        Functional
+                      </>
+                    )}
+                  </Badge>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Maintenance Schedule</label>
+                  <p className="mt-1 text-sm">
+                    {form.maintenance_schedule || 'Not specified'}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Maintenance Activities</label>
+                  <p className="mt-1 text-sm whitespace-pre-line">
+                    {form.maintenance_activities || 'Not specified'}
+                  </p>
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button onClick={() => setIsEditing(true)}>Edit Details</Button>
+              </DialogFooter>
             </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Location *</label>
-                <Select
-                  value={form.office_id?.toString() || ""}
-                  onValueChange={value => setForm({ ...form, office_id: Number(value) })}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <ScrollArea className="h-60">
-                      {offices.map(office => (
-                        <SelectItem key={office.id} value={office.id.toString()}>
-                          {office.office_name}
-                        </SelectItem>
-                      ))}
-                    </ScrollArea>
-                  </SelectContent>
-                </Select>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">Equipment Name *</label>
+                  <Input
+                    value={form.equipment_name || ""}
+                    onChange={e => setForm({ ...form, equipment_name: e.target.value })}
+                    placeholder="Enter equipment name"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">Categories</label>
+                  <Popover open={categoriesOpen} onOpenChange={setCategoriesOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={categoriesOpen}
+                        className="w-full justify-between"
+                      >
+                        {selectedCategories.length > 0 
+                          ? `${selectedCategories.length} selected`
+                          : "Select categories..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Search categories..." />
+                        <CommandEmpty>No categories found.</CommandEmpty>
+                        <CommandGroup className="max-h-60 overflow-y-auto">
+                          <ScrollArea className="h-60">
+                            {categories.map((category) => (
+                              <CommandItem
+                                key={category.id}
+                                onSelect={() => handleCategorySelect(category)}
+                                className="cursor-pointer"
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    isCategorySelected(category) ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {category.name}
+                              </CommandItem>
+                            ))}
+                          </ScrollArea>
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCategories.map((category) => (
+                      <Badge 
+                        key={category.id} 
+                        variant="secondary"
+                        className="flex items-center gap-1 py-1"
+                      >
+                        {category.name}
+                        <button
+                          type="button"
+                          onClick={() => handleCategorySelect(category)}
+                          className="ml-1 text-xs rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 h-4 w-4 flex items-center justify-center"
+                        >
+                          ×
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">Location *</label>
+                  <Select
+                    value={form.office_id?.toString() || ""}
+                    onValueChange={value => setForm({ ...form, office_id: Number(value) })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <ScrollArea className="h-60">
+                        {offices.map(office => (
+                          <SelectItem key={office.id} value={office.id.toString()}>
+                            {office.office_name}
+                          </SelectItem>
+                        ))}
+                      </ScrollArea>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">Faculty *</label>
+                  <Select
+                    value={form.faculty_id?.toString() || ""}
+                    onValueChange={value => setForm({ ...form, faculty_id: Number(value) })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select faculty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <ScrollArea className="h-60">
+                        {faculties.map(faculty => (
+                          <SelectItem key={faculty.id} value={faculty.id.toString()}>
+                            {faculty.name}
+                          </SelectItem>
+                        ))}
+                      </ScrollArea>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">Serial Number / Code No.</label>
+                  <Input
+                    value={form.serial_number || ""}
+                    onChange={e => setForm({ ...form, serial_number: e.target.value })}
+                    placeholder="Enter serial number"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">Date Acquired</label>
+                  <Input
+                    type="date"
+                    value={form.date_acquired || ""}
+                    onChange={e => setForm({ ...form, date_acquired: e.target.value })}
+                  />
+                </div>
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Faculty *</label>
-                <Select
-                  value={form.faculty_id?.toString() || ""}
-                  onValueChange={value => setForm({ ...form, faculty_id: Number(value) })}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select faculty" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <ScrollArea className="h-60">
-                      {faculties.map(faculty => (
-                        <SelectItem key={faculty.id} value={faculty.id.toString()}>
-                          {faculty.name}
-                        </SelectItem>
-                      ))}
-                    </ScrollArea>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Serial Number / Code No.</label>
-                <Input
-                  value={form.serial_number || ""}
-                  onChange={e => setForm({ ...form, serial_number: e.target.value })}
-                  placeholder="Enter serial number"
+                <label className="text-sm font-medium leading-none">Notes</label>
+                <Textarea
+                  value={form.notes || ""}
+                  onChange={e => setForm({ ...form, notes: e.target.value })}
+                  placeholder="Additional notes or description"
                 />
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Date Acquired</label>
-                <Input
-                  value={form.date_acquired || ""}
-                  onChange={e => setForm({ ...form, date_acquired: e.target.value })}
-                />
+                <label className="text-sm font-medium leading-none">Status</label>
+                <Select
+                  value={form.remarks || "Functional"}
+                  onValueChange={value => setForm({ ...form, remarks: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Functional">
+                      <div className="flex items-center gap-2">
+                        <BadgeCheck className="h-4 w-4" />
+                        Functional
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Non-Functional">
+                      <div className="flex items-center gap-2">
+                        <Ban className="h-4 w-4" />
+                        Non-Functional
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Defective">
+                      <div className="flex items-center gap-2">
+                        <Ban className="h-4 w-4" />
+                        Defective
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Under Repair">
+                      <div className="flex items-center gap-2">
+                        <Wrench className="h-4 w-4" />
+                        Under Repair
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium leading-none">Notes</label>
-              <Input
-                value={form.notes || ""}
-                onChange={e => setForm({ ...form, notes: e.target.value })}
-                placeholder="Additional notes or description"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium leading-none">Status</label>
-              <Select
-                value={form.remarks || "Functional"}
-                onValueChange={value => setForm({ ...form, remarks: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Functional">
-                    <div className="flex items-center gap-2">
-                      <BadgeCheck className="h-4 w-4" />
-                      Functional
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="Non-Functional">
-                    <div className="flex items-center gap-2">
-                      <Ban className="h-4 w-4" />
-                      Non-Functional
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="Defective">
-                    <div className="flex items-center gap-2">
-                      <Ban className="h-4 w-4" />
-                      Defective
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="Under Repair">
-                    <div className="flex items-center gap-2">
-                      <Wrench className="h-4 w-4" />
-                      Under Repair
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button 
-                type="button"
-                variant="outline"
-                onClick={() => { 
-                  setShowModal(false); 
-                  setEditId(null); 
-                  setForm({}); 
-                  setSelectedCategories([]); 
-                }}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">
-                {editId ? "Save Changes" : "Add Equipment"}
-              </Button>
-            </DialogFooter>
-          </form>
+              
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">Maintenance Schedule</label>
+                  <Input
+                    value={form.maintenance_schedule || ""}
+                    onChange={e => setForm({ ...form, maintenance_schedule: e.target.value })}
+                    placeholder="e.g., Quarterly, Monthly, etc."
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">Maintenance Activities</label>
+                  <Textarea
+                    value={form.maintenance_activities || ""}
+                    onChange={e => setForm({ ...form, maintenance_activities: e.target.value })}
+                    placeholder="Describe maintenance activities"
+                  />
+                </div>
+              </div>
+              
+              <DialogFooter className="gap-2 sm:gap-0">
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={() => { 
+                    setShowModal(false); 
+                    setEditId(null); 
+                    setForm({}); 
+                    setSelectedCategories([]); 
+                    setIsEditing(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  {editId ? "Save Changes" : "Add Equipment"}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
 

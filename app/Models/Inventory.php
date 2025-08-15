@@ -16,6 +16,8 @@ class Inventory extends Model
         'date_acquired',
         'notes',
         'remarks',
+        'maintenance_schedule',
+        'maintenance_activities'
     ];
 
     public function categories()

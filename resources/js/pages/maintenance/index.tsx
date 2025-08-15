@@ -388,8 +388,8 @@ export default function Maintenance() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead colSpan={6} className="text-left font-semibold text-lg border bg-gray-50">
-                                        Based on the Inventory of ABE Equipment (As of June 2024)
+                                    <TableHead colSpan={6} className="text-center font-semibold text-lg border bg-gray-50">
+                                        Based on the Inventory of ABE Equipment
                                     </TableHead>
                                 </TableRow>
                                 <TableRow>
@@ -398,7 +398,6 @@ export default function Maintenance() {
                                     <TableHead className="border">Remarks</TableHead>
                                     <TableHead className="border">Remark (Maintenance Schedule)</TableHead>
                                     <TableHead className="border">Activities</TableHead>
-                                    <TableHead className="border">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -406,7 +405,7 @@ export default function Maintenance() {
                                     equipmentSummary.map((item) => (
                                         <TableRow key={item.equipment_name}>
                                             <TableCell className="border">{item.equipment_name}</TableCell>
-                                            <TableCell className="border">{item.total_count}</TableCell>
+                                            <TableCell className="border text-center">{item.total_count}</TableCell>
                                             <TableCell className="border">
                                                 {item.functional_count} functional, 
                                                 <br />
