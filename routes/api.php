@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\CalibrationController;
+use App\Http\Controllers\MaintenanceController;
 
 
 Route::get('/user', function (Request $request) {
@@ -66,3 +67,14 @@ Route::get('/user', function (Request $request) {
         Route::put('/{id}', 'update')->name('calibration.update');
         Route::delete('/{id}', 'destroy')->name('calibration.destroy');
     });
+
+    Route::controller(MaintenanceController::class)->group(function(){
+        Route::get('/maintenance', 'index')->name('maintenance.index');
+        Route::get('/maintenance/fetch', 'fetch')->name('maintenance.fetch');
+        Route::post('/maintenance/annual-preventive-maintenance', 'store')->name('maintenance.store');
+        Route::get('/maintenance/{id}', 'show')->name('maintenance.show');
+        Route::put('/maintenance/{id}', 'update');
+        Route::delete('/maintenance/{id}', 'destroy')->name('maintenance.destroy');
+        
+    });
+Route::resource('maintenance', MaintenanceController::class);
