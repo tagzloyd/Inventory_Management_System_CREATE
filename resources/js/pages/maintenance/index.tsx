@@ -211,7 +211,7 @@ export default function Maintenance() {
     // Add this function to fetch equipment data
     const fetchEquipmentSummary = async () => {
         try {
-            const response = await axios.get('/api/existing_equipment');
+            const response = await axios.get('/api/fetch');
             setEquipmentSummary(response.data);
         } catch (err) {
             console.error('Error fetching equipment summary:', err);
