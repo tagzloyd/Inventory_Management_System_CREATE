@@ -25,10 +25,10 @@ class InventoryController extends Controller
             ->select(
                 'equipment_name',
                 DB::raw('COUNT(*) as total_count'),
-                DB::raw('SUM(CASE WHEN remarks = "Functional" THEN 1 ELSE 0 END) as functional_count'),
-                DB::raw('SUM(CASE WHEN remarks = "Non-functional" THEN 1 ELSE 0 END) as non_functional_count'),
-                DB::raw('SUM(CASE WHEN remarks = "Defective" THEN 1 ELSE 0 END) as defective_count'),
-                DB::raw('SUM(CASE WHEN remarks = "Under repair" THEN 1 ELSE 0 END) as under_repair_count')
+                DB::raw("SUM(CASE WHEN LOWER(remarks) = 'functional' THEN 1 ELSE 0 END) as functional_count"),
+                DB::raw("SUM(CASE WHEN LOWER(remarks) = 'non-functional' THEN 1 ELSE 0 END) as non_functional_count"),
+                DB::raw("SUM(CASE WHEN LOWER(remarks) = 'defective' THEN 1 ELSE 0 END) as defective_count"),
+                DB::raw("SUM(CASE WHEN LOWER(remarks) = 'under repair' THEN 1 ELSE 0 END) as under_repair_count")
             )
             ->groupBy('equipment_name')
             ->orderBy('equipment_name')
@@ -36,6 +36,7 @@ class InventoryController extends Controller
 
         return $equipmentSummary;
     }
+
 
      public function fetchFaculties()
     {
