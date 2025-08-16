@@ -25,10 +25,6 @@ interface MaintenanceItem {
     updated_at?: string;
 }
 
-interface Maintenance_SchedItem{
-    maintenance_schedule: string | null;
-    maintenance_activities: string | null;
-}
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Inventory Management', href: '/dashboard' },
@@ -39,7 +35,6 @@ type MaintenanceField = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'semi_ann
 
 export default function Maintenance() {
     const [maintenanceItems, setMaintenanceItems] = useState<MaintenanceItem[]>([]);
-    const [maintenancSchedItem, setMaintenanceSchedItem] = useState<Maintenance_SchedItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
@@ -61,41 +56,8 @@ export default function Maintenance() {
         fetchMaintenanceItems();
     }, []);
 
-    useEffect(() => {
-        fetchMaintenanceSchedItems();
-    }, []);
 
-    const fetchMaintenanceSchedItems = async () => {
-         try {
-            setLoading(true);
-            setError(null);
-            const response = await axios.get('/api/fetch/schedule');
-            
-            // Debug logging
-            console.log('API Response:', response);
-            
-            if (!response.data) {
-                throw new Error('No data received from API');
-            }
-
-            // Handle both array and object responses
-            const items = Array.isArray(response.data) 
-                ? response.data 
-                : response.data.data || [];
-                
-            if (!Array.isArray(items)) {
-                throw new Error('Expected array but got ' + typeof items);
-            }
-
-            setMaintenanceSchedItem(items);
-        } catch (err) {
-            console.error('Error fetching maintenance schedule and activities items:', err);
-            setError('Failed to load maintenance schedule and activities items. Please try again later.');
-            setMaintenanceSchedItem([]);
-        } finally {
-            setLoading(false);
-        }
-    }
+    
 
     const fetchMaintenanceItems = async () => {
         try {
@@ -241,13 +203,21 @@ export default function Maintenance() {
         under_repair_count: number;
     }
 
+    interface Maintenance_SchedItem{
+    maintenance_schedule: string | null;
+    maintenance_activities: string | null;
+    }
+
     // Add this to your component state
+    
+    const [maintenancSchedItem, setMaintenanceSchedItem] = useState<Maintenance_SchedItem[]>([]);
     const [equipmentSummary, setEquipmentSummary] = useState<EquipmentSummary[]>([]);
 
     // Add this to your useEffect to fetch the equipment data
     useEffect(() => {
         fetchMaintenanceItems();
-        fetchEquipmentSummary(); // Add this line
+        fetchEquipmentSummary();
+        fetchMaintenanceSchedItems(); // Add this line
     }, []);
 
     // Add this function to fetch equipment data
@@ -260,6 +230,15 @@ export default function Maintenance() {
             toast.error('Failed to load equipment summary');
         }
     };
+    const fetchMaintenanceSchedItems = async () => {
+        try {
+            const response = await axios.get('/api/fetch/schedule');
+            setMaintenanceSchedItem(response.data);
+        } catch (err) {
+            console.error('Error fetching maintenance schedule and activities:', err);
+            toast.error('Failed to load maintenance schedule and activities');
+        }
+    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -459,10 +438,10 @@ export default function Maintenance() {
                                             </TableCell>
                                             {maintenancSchedItem.length > 0 ? (
                                                 maintenancSchedItem.map((item) => (
-                                                    <TableRow key={item.maintenance_schedule}>
+                                                    <div key={item.maintenance_schedule}>
                                                         <TableCell className="border">{item.maintenance_schedule}</TableCell>
                                                         <TableCell className="border">{item.maintenance_activities}</TableCell>
-                                                    </TableRow>
+                                                    </div>
                                                 ))
                                             ) : (
                                                 <TableRow>
