@@ -423,35 +423,35 @@ export default function Maintenance() {
                             </TableHeader>
                             <TableBody>
                                 {equipmentSummary.length > 0 ? (
-                                    equipmentSummary.map((item) => (
-                                        <TableRow key={item.equipment_name}>
-                                            <TableCell className="border">{item.equipment_name}</TableCell>
-                                            <TableCell className="border text-center">{item.total_count}</TableCell>
-                                            <TableCell className="border">
-                                                {item.functional_count} functional, 
-                                                <br />
-                                                {item.non_functional_count} non-functional,
-                                                <br />
-                                                {item.defective_count} defective,
-                                                <br />
-                                                {item.under_repair_count} under repair
-                                            </TableCell>
-                                            {maintenancSchedItem.length > 0 ? (
-                                                maintenancSchedItem.map((item) => (
-                                                    <div key={item.maintenance_schedule}>
-                                                        <TableCell className="border">{item.maintenance_schedule}</TableCell>
-                                                        <TableCell className="border">{item.maintenance_activities}</TableCell>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <TableRow>
-                                                    <TableCell className="border" colSpan={2}>
-                                                        No Maintenance Schedule
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableRow>
-                                    ))
+                                    equipmentSummary.map((equipment, index) => {
+                                        // Get corresponding maintenance schedule item if it exists
+                                        const maintenanceItem = maintenancSchedItem[index] || {
+                                            maintenance_schedule: null,
+                                            maintenance_activities: null
+                                        };
+
+                                        return (
+                                            <TableRow key={equipment.equipment_name}>
+                                                <TableCell className="border">{equipment.equipment_name}</TableCell>
+                                                <TableCell className="border text-center">{equipment.total_count}</TableCell>
+                                                <TableCell className="border">
+                                                    {equipment.functional_count} functional, 
+                                                    <br />
+                                                    {equipment.non_functional_count} non-functional,
+                                                    <br />
+                                                    {equipment.defective_count} defective,
+                                                    <br />
+                                                    {equipment.under_repair_count} under repair
+                                                </TableCell>
+                                                <TableCell className="border">
+                                                    {maintenanceItem.maintenance_schedule || 'N/A'}
+                                                </TableCell>
+                                                <TableCell className="border">
+                                                    {maintenanceItem.maintenance_activities || 'N/A'}
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })
                                 ) : (
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center py-4">
