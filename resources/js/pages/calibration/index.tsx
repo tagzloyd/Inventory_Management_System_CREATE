@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Trash2, Edit, Download, FileText, FileSpreadsheet } from 'lucide-react';
+import { Trash2, Edit, Download, FileText, FileSpreadsheet, Plus } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 
 const breadcrumbs = [
@@ -90,6 +90,7 @@ export default function Calibration() {
     const [selectedMonths, setSelectedMonths] = useState<Record<string, boolean>>({});
     const [statusValue, setStatusValue] = useState('');
     const [remarksValue, setRemarksValue] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
@@ -98,6 +99,7 @@ export default function Calibration() {
     }, []);
 
     const fetchCalibrations = async () => {
+        setIsLoading(true);
         const toastId = toast.loading('Loading calibration data...');
         try {
             const response = await fetch('/api/calibration/fetch');
@@ -118,6 +120,8 @@ export default function Calibration() {
         } catch (error) {
             console.error('Error fetching calibrations:', error);
             toast.error('Failed to load calibration data. Please try again.', { id: toastId });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -320,388 +324,388 @@ export default function Calibration() {
     };
 
     const exportCSV = () => {
-  if (calibrations.length === 0) {
-    toast.warning('No calibration data to export');
-    return;
-  }
+        if (calibrations.length === 0) {
+            toast.warning('No calibration data to export');
+            return;
+        }
 
-  const headerStyle = `
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-      }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin: 20px 0;
-      }
-      th {
-        background-color: #1a5fb4;
-        color: white;
-        font-weight: bold;
-        text-align: center;
-        padding: 8px;
-        border: 1px solid #0b4491;
-        font-size: 11px;
-      }
-      td {
-        padding: 8px;
-        border: 1px solid #e5e7eb;
-        text-align: center;
-        font-size: 11px;
-      }
-      .instrument-cell {
-        font-weight: bold;
-        text-align: left;
-        background: white !important;
-        border-left: 1px solid #e5e7eb !important;
-      }
-      .info-cell {
-        background: white !important;
-      }
-      .planned-header {
-        background: #dbeafe !important;
-        color: #1d4ed8;
-        font-weight: bold;
-      }
-      .actual-header {
-        background: #dcfce7 !important;
-        color: #166534;
-        font-weight: bold;
-      }
-      .remarks-header {
-        background: #fef9c3 !important;
-        color: #713f12;
-        font-weight: bold;
-      }
-      .planned-data {
-        color: #1d4ed8;
-        background-color: #eff6ff;
-      }
-      .actual-data {
-        color: #166534;
-        background-color: #ecfdf5;
-      }
-      .remarks-data {
-        color: #713f12;
-        background-color: #fefce8;
-      }
-      .alt-row td {
-        background-color: #f8fafc;
-      }
-      .title-row {
-        font-size: 16px;
-        font-weight: bold;
-        color: #1e293b;
-        padding: 10px 0;
-      }
-      .subtitle-row {
-        font-size: 11px;
-        color: #64748b;
-        padding: 5px 0;
-      }
-    </style>
-  `;
+        const headerStyle = `
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                }
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin: 20px 0;
+                }
+                th {
+                    background-color: #1a5fb4;
+                    color: white;
+                    font-weight: bold;
+                    text-align: center;
+                    padding: 8px;
+                    border: 1px solid #0b4491;
+                    font-size: 11px;
+                }
+                td {
+                    padding: 8px;
+                    border: 1px solid #e5e7eb;
+                    text-align: center;
+                    font-size: 11px;
+                }
+                .instrument-cell {
+                    font-weight: bold;
+                    text-align: left;
+                    background: white !important;
+                    border-left: 1px solid #e5e7eb !important;
+                }
+                .info-cell {
+                    background: white !important;
+                }
+                .planned-header {
+                    background: #dbeafe !important;
+                    color: #1d4ed8;
+                    font-weight: bold;
+                }
+                .actual-header {
+                    background: #dcfce7 !important;
+                    color: #166534;
+                    font-weight: bold;
+                }
+                .remarks-header {
+                    background: #fef9c3 !important;
+                    color: #713f12;
+                    font-weight: bold;
+                }
+                .planned-data {
+                    color: #1d4ed8;
+                    background-color: #eff6ff;
+                }
+                .actual-data {
+                    color: #166534;
+                    background-color: #ecfdf5;
+                }
+                .remarks-data {
+                    color: #713f12;
+                    background-color: #fefce8;
+                }
+                .alt-row td {
+                    background-color: #f8fafc;
+                }
+                .title-row {
+                    font-size: 16px;
+                    font-weight: bold;
+                    color: #1e293b;
+                    padding: 10px 0;
+                }
+                .subtitle-row {
+                    font-size: 11px;
+                    color: #64748b;
+                    padding: 5px 0;
+                }
+            </style>
+        `;
 
-  let excelContent = `
-    <html xmlns:o="urn:schemas-microsoft-com:office:office" 
-          xmlns:x="urn:schemas-microsoft-com:office:excel" 
-          xmlns="http://www.w3.org/TR/REC-html40">
-    <head>
-      ${headerStyle}
-      <!--[if gte mso 9]>
-      <xml>
-        <x:ExcelWorkbook>
-          <x:ExcelWorksheets>
-            <x:ExcelWorksheet>
-              <x:Name>Calibration Report</x:Name>
-              <x:WorksheetOptions>
-                <x:DisplayGridlines/>
-              </x:WorksheetOptions>
-            </x:ExcelWorksheet>
-          </x:ExcelWorksheets>
-        </x:ExcelWorkbook>
-      </xml>
-      <![endif]-->
-    </head>
-    <body>
-      <table>
-        <tr>
-          <td colspan="${months.length + 4}" class="title-row">
-            Annual Calibration Report - Caraga State University
-          </td>
-        </tr>
-        <tr>
-          <td colspan="${months.length + 4}" class="subtitle-row">
-            Generated on: ${new Date().toLocaleString()}
-          </td>
-        </tr>
-        <tr>
-          <th style="width: 200px; text-align: left;">Instrument Name/Eq.Code</th>
-          <th style="width: 120px;">Issued To</th>
-          <th style="width: 100px;">Frequency</th>
-          <th style="width: 80px;">Status</th>
-          ${months.map(month => 
-            `<th style="width: 60px;">${month.charAt(0).toUpperCase() + month.slice(1)}</th>`
-          ).join('')}
-        </tr>
-  `;
+        let excelContent = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+                  xmlns:x="urn:schemas-microsoft-com:office:excel" 
+                  xmlns="http://www.w3.org/TR/REC-html40">
+            <head>
+                ${headerStyle}
+                <!--[if gte mso 9]>
+                <xml>
+                    <x:ExcelWorkbook>
+                        <x:ExcelWorksheets>
+                            <x:ExcelWorksheet>
+                                <x:Name>Calibration Report</x:Name>
+                                <x:WorksheetOptions>
+                                    <x:DisplayGridlines/>
+                                </x:WorksheetOptions>
+                            </x:ExcelWorksheet>
+                        </x:ExcelWorksheets>
+                    </x:ExcelWorkbook>
+                </xml>
+                <![endif]-->
+            </head>
+            <body>
+                <table>
+                    <tr>
+                        <td colspan="${months.length + 4}" class="title-row">
+                            Annual Calibration Report - Caraga State University
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="${months.length + 4}" class="subtitle-row">
+                            Generated on: ${new Date().toLocaleString()}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="width: 200px; text-align: left;">Instrument Name/Eq.Code</th>
+                        <th style="width: 120px;">Issued To</th>
+                        <th style="width: 100px;">Frequency</th>
+                        <th style="width: 80px;">Status</th>
+                        ${months.map(month => 
+                            `<th style="width: 60px;">${month.charAt(0).toUpperCase() + month.slice(1)}</th>`
+                        ).join('')}
+                    </tr>
+        `;
 
-  calibrations.forEach((calibration, index) => {
-    const rowClass = index % 2 === 0 ? '' : 'class="alt-row"';
-    
-    excelContent += `
-      <tr ${rowClass}>
-        <td class="instrument-cell" rowspan="3">${calibration.instrument_name_or_eq_code}</td>
-        <td class="info-cell" rowspan="3">${calibration.issued_to || '-'}</td>
-        <td class="info-cell" rowspan="3">${calibration.freq_of_cal || '-'}</td>
-        <td class="planned-header">Planned</td>
-        ${months.map(month => 
-          `<td class="planned-data">${getMonthValue(calibration, 'planned', month)}</td>`
-        ).join('')}
-      </tr>
-      
-      <tr ${rowClass}>
-        <td class="actual-header">Actual</td>
-        ${months.map(month => 
-          `<td class="actual-data">${getMonthValue(calibration, 'actual', month)}</td>`
-        ).join('')}
-      </tr>
-      
-      <tr ${rowClass}>
-        <td class="remarks-header">Remarks</td>
-        ${months.map(month => 
-          `<td class="remarks-data">${getMonthValue(calibration, 'remarks', month)}</td>`
-        ).join('')}
-      </tr>
-    `;
-  });
+        calibrations.forEach((calibration, index) => {
+            const rowClass = index % 2 === 0 ? '' : 'class="alt-row"';
+            
+            excelContent += `
+                <tr ${rowClass}>
+                    <td class="instrument-cell" rowspan="3">${calibration.instrument_name_or_eq_code}</td>
+                    <td class="info-cell" rowspan="3">${calibration.issued_to || '-'}</td>
+                    <td class="info-cell" rowspan="3">${calibration.freq_of_cal || '-'}</td>
+                    <td class="planned-header">Planned</td>
+                    ${months.map(month => 
+                        `<td class="planned-data">${getMonthValue(calibration, 'planned', month)}</td>`
+                    ).join('')}
+                </tr>
+                
+                <tr ${rowClass}>
+                    <td class="actual-header">Actual</td>
+                    ${months.map(month => 
+                        `<td class="actual-data">${getMonthValue(calibration, 'actual', month)}</td>`
+                    ).join('')}
+                </tr>
+                
+                <tr ${rowClass}>
+                    <td class="remarks-header">Remarks</td>
+                    ${months.map(month => 
+                        `<td class="remarks-data">${getMonthValue(calibration, 'remarks', month)}</td>`
+                    ).join('')}
+                </tr>
+            `;
+        });
 
-  excelContent += `
-      </table>
-    </body>
-    </html>
-  `;
+        excelContent += `
+                </table>
+            </body>
+            </html>
+        `;
 
-  const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `CSU_Calibration_Report_${new Date().toISOString().split('T')[0]}.xls`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+        const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `CSU_Calibration_Report_${new Date().toISOString().split('T')[0]}.xls`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
 
-  toast.success('Excel export completed');
-};
+        toast.success('Excel export completed');
+    };
 
-const printReport = () => {
-  if (calibrations.length === 0) {
-    toast.warning('No calibration data to print');
-    return;
-  }
+    const printReport = () => {
+        if (calibrations.length === 0) {
+            toast.warning('No calibration data to print');
+            return;
+        }
 
-  const printWindow = window.open('', '', 'width=1200,height=800');
-  if (!printWindow) {
-    toast.error('Popup was blocked. Please allow popups for this site.');
-    return;
-  }
+        const printWindow = window.open('', '', 'width=1200,height=800');
+        if (!printWindow) {
+            toast.error('Popup was blocked. Please allow popups for this site.');
+            return;
+        }
 
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+        const currentDate = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
 
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Annual Calibration Report</title>
-        <style>
-          @page {
-            size: A4 landscape;
-            margin: 15mm;
-          }
-          body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            color: #1e293b;
-            font-size: 12px;
-            line-height: 1.4;
-          }
-          .report-header {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e5e7eb;
-          }
-          .report-title {
-            margin: 0;
-            font-size: 22px;
-            font-weight: 700;
-            color: #1e293b;
-          }
-          .report-subtitle {
-            margin: 4px 0 0;
-            font-size: 13px;
-            color: #64748b;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0 20px;
-            font-size: 11px;
-            page-break-inside: avoid;
-          }
-          th {
-            background-color: #1a5fb4;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-            padding: 8px;
-            border: 1px solid #0b4491;
-          }
-          td {
-            padding: 8px;
-            border: 1px solid #e5e7eb;
-            text-align: center;
-          }
-          .instrument-cell {
-            font-weight: bold;
-            text-align: left;
-            background: white !important;
-            border-left: 1px solid #e5e7eb !important;
-          }
-          .info-cell {
-            background: white !important;
-          }
-          .planned-header {
-            background: #dbeafe !important;
-            color: #1d4ed8;
-            font-weight: bold;
-          }
-          .actual-header {
-            background: #dcfce7 !important;
-            color: #166534;
-            font-weight: bold;
-          }
-          .remarks-header {
-            background: #fef9c3 !important;
-            color: #713f12;
-            font-weight: bold;
-          }
-          .planned-data {
-            color: #1d4ed8;
-            background-color: #eff6ff;
-          }
-          .actual-data {
-            color: #166534;
-            background-color: #ecfdf5;
-          }
-          .remarks-data {
-            color: #713f12;
-            background-color: #fefce8;
-          }
-          .alt-row td {
-            background-color: #f8fafc;
-          }
-          .footer {
-            text-align: right;
-            font-size: 10px;
-            color: #64748b;
-            margin-top: 30px;
-            padding-top: 10px;
-            border-top: 1px solid #e2e8f0;
-          }
-          .signature-line {
-            display: inline-block;
-            width: 150px;
-            border-top: 1px solid #94a3b8;
-            margin: 30px 0 5px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="report-header">
-          <h1 class="report-title">Annual Calibration Report</h1>
-          <p class="report-subtitle">
-            <strong>Caraga State University</strong><br>
-            Generated on ${currentDate} | ${calibrations.length} instruments
-          </p>
-        </div>
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Annual Calibration Report</title>
+                    <style>
+                        @page {
+                            size: A4 landscape;
+                            margin: 15mm;
+                        }
+                        body {
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            margin: 0;
+                            padding: 20px;
+                            color: #1e293b;
+                            font-size: 12px;
+                            line-height: 1.4;
+                        }
+                        .report-header {
+                            margin-bottom: 20px;
+                            padding-bottom: 15px;
+                            border-bottom: 2px solid #e5e7eb;
+                        }
+                        .report-title {
+                            margin: 0;
+                            font-size: 22px;
+                            font-weight: 700;
+                            color: #1e293b;
+                        }
+                        .report-subtitle {
+                            margin: 4px 0 0;
+                            font-size: 13px;
+                            color: #64748b;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin: 10px 0 20px;
+                            font-size: 11px;
+                            page-break-inside: avoid;
+                        }
+                        th {
+                            background-color: #1a5fb4;
+                            color: white;
+                            font-weight: bold;
+                            text-align: center;
+                            padding: 8px;
+                            border: 1px solid #0b4491;
+                        }
+                        td {
+                            padding: 8px;
+                            border: 1px solid #e5e7eb;
+                            text-align: center;
+                        }
+                        .instrument-cell {
+                            font-weight: bold;
+                            text-align: left;
+                            background: white !important;
+                            border-left: 1px solid #e5e7eb !important;
+                        }
+                        .info-cell {
+                            background: white !important;
+                        }
+                        .planned-header {
+                            background: #dbeafe !important;
+                            color: #1d4ed8;
+                            font-weight: bold;
+                        }
+                        .actual-header {
+                            background: #dcfce7 !important;
+                            color: #166534;
+                            font-weight: bold;
+                        }
+                        .remarks-header {
+                            background: #fef9c3 !important;
+                            color: #713f12;
+                            font-weight: bold;
+                        }
+                        .planned-data {
+                            color: #1d4ed8;
+                            background-color: #eff6ff;
+                        }
+                        .actual-data {
+                            color: #166534;
+                            background-color: #ecfdf5;
+                        }
+                        .remarks-data {
+                            color: #713f12;
+                            background-color: #fefce8;
+                        }
+                        .alt-row td {
+                            background-color: #f8fafc;
+                        }
+                        .footer {
+                            text-align: right;
+                            font-size: 10px;
+                            color: #64748b;
+                            margin-top: 30px;
+                            padding-top: 10px;
+                            border-top: 1px solid #e2e8f0;
+                        }
+                        .signature-line {
+                            display: inline-block;
+                            width: 150px;
+                            border-top: 1px solid #94a3b8;
+                            margin: 30px 0 5px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="report-header">
+                        <h1 class="report-title">Annual Calibration Report</h1>
+                        <p class="report-subtitle">
+                            <strong>Caraga State University</strong><br>
+                            Generated on ${currentDate} | ${calibrations.length} instruments
+                        </p>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 200px; text-align: left;">Instrument Name/Eq.Code</th>
+                                <th style="width: 120px;">Issued To</th>
+                                <th style="width: 100px;">Frequency</th>
+                                <th style="width: 80px;">Status</th>
+                                ${months.map(month => 
+                                    `<th style="width: 60px;">${month.charAt(0).toUpperCase() + month.slice(1)}</th>`
+                                ).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${calibrations.map((calibration, index) => {
+                                const rowClass = index % 2 === 0 ? '' : 'class="alt-row"';
+                                return `
+                                    <tr ${rowClass}>
+                                        <td class="instrument-cell" rowspan="3">${calibration.instrument_name_or_eq_code}</td>
+                                        <td class="info-cell" rowspan="3">${calibration.issued_to || '-'}</td>
+                                        <td class="info-cell" rowspan="3">${calibration.freq_of_cal || '-'}</td>
+                                        <td class="planned-header">Planned</td>
+                                        ${months.map(month => 
+                                            `<td class="planned-data">${getMonthValue(calibration, 'planned', month)}</td>`
+                                        ).join('')}
+                                    </tr>
+                                    <tr ${rowClass}>
+                                        <td class="actual-header">Actual</td>
+                                        ${months.map(month => 
+                                            `<td class="actual-data">${getMonthValue(calibration, 'actual', month)}</td>`
+                                        ).join('')}
+                                    </tr>
+                                    <tr ${rowClass}>
+                                        <td class="remarks-header">Remarks</td>
+                                        ${months.map(month => 
+                                            `<td class="remarks-data">${getMonthValue(calibration, 'remarks', month)}</td>`
+                                        ).join('')}
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <div class="footer">
+                        <div style="margin-top: 40px;">
+                            <div class="signature-line"></div>
+                            <div style="font-size: 11px; color: #475569;">Prepared by: CREATE & DABE - Inventory Management</div>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <div style="font-size: 10px; color: #64748b;">
+                                Printed on: ${new Date().toLocaleString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </body>
+            </html>
+        `);
         
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 200px; text-align: left;">Instrument Name/Eq.Code</th>
-              <th style="width: 120px;">Issued To</th>
-              <th style="width: 100px;">Frequency</th>
-              <th style="width: 80px;">Status</th>
-              ${months.map(month => 
-                `<th style="width: 60px;">${month.charAt(0).toUpperCase() + month.slice(1)}</th>`
-              ).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            ${calibrations.map((calibration, index) => {
-              const rowClass = index % 2 === 0 ? '' : 'class="alt-row"';
-              return `
-                <tr ${rowClass}>
-                  <td class="instrument-cell" rowspan="3">${calibration.instrument_name_or_eq_code}</td>
-                  <td class="info-cell" rowspan="3">${calibration.issued_to || '-'}</td>
-                  <td class="info-cell" rowspan="3">${calibration.freq_of_cal || '-'}</td>
-                  <td class="planned-header">Planned</td>
-                  ${months.map(month => 
-                    `<td class="planned-data">${getMonthValue(calibration, 'planned', month)}</td>`
-                  ).join('')}
-                </tr>
-                <tr ${rowClass}>
-                  <td class="actual-header">Actual</td>
-                  ${months.map(month => 
-                    `<td class="actual-data">${getMonthValue(calibration, 'actual', month)}</td>`
-                  ).join('')}
-                </tr>
-                <tr ${rowClass}>
-                  <td class="remarks-header">Remarks</td>
-                  ${months.map(month => 
-                    `<td class="remarks-data">${getMonthValue(calibration, 'remarks', month)}</td>`
-                  ).join('')}
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
-        
-        <div class="footer">
-          <div style="margin-top: 40px;">
-            <div class="signature-line"></div>
-            <div style="font-size: 11px; color: #475569;">Prepared by: CREATE & DABE - Inventory Management</div>
-          </div>
-          <div style="margin-top: 10px;">
-            <div style="font-size: 10px; color: #64748b;">
-              Printed on: ${new Date().toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </div>
-          </div>
-        </div>
-      </body>
-    </html>
-  `);
-  
-  printWindow.document.close();
-  setTimeout(() => {
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
-  }, 500);
-  toast.success('PDF report generated successfully');
-};
+        printWindow.document.close();
+        setTimeout(() => {
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        }, 500);
+        toast.success('PDF report generated successfully');
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -720,70 +724,78 @@ const printReport = () => {
                             <Button 
                                 variant="outline" 
                                 onClick={exportCSV}
-                                disabled={calibrations.length === 0}
+                                disabled={calibrations.length === 0 || isLoading}
+                                className="gap-2"
                             >
-                                <FileSpreadsheet className="mr-2 h-4 w-4" />
-                                Export Excel
+                                <FileSpreadsheet className="h-4 w-4" />
+                                <span>Export Excel</span>
                             </Button>
                             <Button 
                                 variant="outline" 
                                 onClick={printReport}
-                                disabled={calibrations.length === 0}
+                                disabled={calibrations.length === 0 || isLoading}
+                                className="gap-2"
                             >
-                                <FileText className="mr-2 h-4 w-4" />
-                                Export PDF
+                                <FileText className="h-4 w-4" />
+                                <span>Export PDF</span>
                             </Button>
                             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                 <DialogTrigger asChild>
-                                    <Button>Add Calibration</Button>
+                                    <Button className="gap-2">
+                                        <Plus className="h-4 w-4" />
+                                        <span>Add Calibration</span>
+                                    </Button>
                                 </DialogTrigger>
-                                <DialogContent>
+                                <DialogContent className="sm:max-w-[500px]">
                                     <DialogHeader>
-                                        <DialogTitle>Add New Calibration</DialogTitle>
+                                        <DialogTitle className="text-lg">Add New Calibration</DialogTitle>
                                     </DialogHeader>
                                     <form onSubmit={handleSubmit} className="space-y-4">
-                                        <div>
-                                            <label htmlFor="instrument_name_or_eq_code" className="block text-sm font-medium mb-1">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="instrument_name_or_eq_code">
                                                 Instrument Name/Eq. Code
-                                            </label>
+                                            </Label>
                                             <Input
                                                 id="instrument_name_or_eq_code"
                                                 name="instrument_name_or_eq_code"
                                                 value={formData.instrument_name_or_eq_code}
                                                 onChange={handleInputChange}
                                                 required
+                                                placeholder="Enter instrument name or code"
                                             />
                                         </div>
-                                        <div>
-                                            <label htmlFor="issued_to" className="block text-sm font-medium mb-1">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="issued_to">
                                                 Issued To
-                                            </label>
+                                            </Label>
                                             <Input
                                                 id="issued_to"
                                                 name="issued_to"
                                                 value={formData.issued_to}
                                                 onChange={handleInputChange}
+                                                placeholder="Enter department or person"
                                             />
                                         </div>
-                                        <div>
-                                            <label htmlFor="freq_of_cal" className="block text-sm font-medium mb-1">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="freq_of_cal">
                                                 Frequency of Calibration
-                                            </label>
+                                            </Label>
                                             <Input
                                                 id="freq_of_cal"
                                                 name="freq_of_cal"
                                                 value={formData.freq_of_cal}
                                                 onChange={handleInputChange}
+                                                placeholder="e.g. Quarterly, Annually"
                                             />
                                         </div>
-                                        <div className="flex justify-end space-x-2">
+                                        <DialogFooter>
                                             <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                                                 Cancel
                                             </Button>
                                             <Button type="submit">
                                                 Save
                                             </Button>
-                                        </div>
+                                        </DialogFooter>
                                     </form>
                                 </DialogContent>
                             </Dialog>
@@ -791,143 +803,155 @@ const printReport = () => {
                     </div>
                 </div>
 
-                <div className="rounded-md border bg-white shadow-sm overflow-x-auto">
-                    <Table className="min-w-full">
-                        <TableHeader>
-                            <TableRow className="bg-gray-50">
-                                <TableHead className="w-[200px] font-semibold border-r">Instrument Name/Eq.Code</TableHead>
-                                <TableHead className="w-[120px] font-semibold border-r">Issued to</TableHead>
-                                <TableHead className="w-[180px] font-semibold border-r">Frequency of Calibration</TableHead>
-                                <TableHead className="w-[80px] font-semibold border-r">Status</TableHead>
-                                {months.map(month => (
-                                    <TableHead key={month} className="w-[60px] font-semibold text-center border-r">
-                                        {month.charAt(0).toUpperCase() + month.slice(1)}
-                                    </TableHead>
-                                ))}
-                                <TableHead className="w-[80px] font-semibold border-r">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {calibrations.length > 0 ? (
-                                calibrations.map((calibration) => (
-                                    <>
-                                        {/* Main row with instrument info */}
-                                        <TableRow key={`${calibration.id}-main`} className="hover:bg-gray-50">
-                                            <TableCell className="font-medium border-r" rowSpan={3}>
-                                                {calibration.instrument_name_or_eq_code}
-                                            </TableCell>
-                                            <TableCell className="border-r" rowSpan={3}>
-                                                {calibration.issued_to}
-                                            </TableCell>
-                                            <TableCell className="border-r" rowSpan={3}>
-                                                {calibration.freq_of_cal}
-                                            </TableCell>
-                                            <TableCell className="text-xs border-r bg-gray-50">
-                                                <Button 
-                                                    variant="link" 
-                                                    className="h-4 p-0 text-xs"
-                                                    onClick={() => openStatusDialog(calibration, 'planned')}
-                                                >
-                                                    Planned
-                                                </Button>
-                                            </TableCell>
-                                            {months.map(month => (
-                                                <TableCell 
-                                                    key={`${calibration.id}-planned-${month}`} 
-                                                    className="text-center border-r"
-                                                >
-                                                    {getMonthValue(calibration, 'planned', month)}
-                                                </TableCell>
-                                            ))}
-                                            <TableCell className="border-r" rowSpan={3}>
-                                                <div className="flex space-x-2">
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="icon" 
-                                                        onClick={() => openEditDialog(calibration)}
-                                                    >
-                                                        <Edit className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="icon" 
-                                                        onClick={() => handleDelete(calibration.id)}
-                                                    >
-                                                        <Trash2 className="h-4 w-4 text-red-500" />
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                        
-                                        {/* Actual row */}
-                                        <TableRow key={`${calibration.id}-actual`} className="hover:bg-gray-50">
-                                            <TableCell className="text-xs border-r bg-gray-50">
-                                                <Button 
-                                                    variant="link" 
-                                                    className="h-4 p-0 text-xs"
-                                                    onClick={() => openStatusDialog(calibration, 'actual')}
-                                                >
-                                                    Actual
-                                                </Button>
-                                            </TableCell>
-                                            {months.map(month => (
-                                                <TableCell 
-                                                    key={`${calibration.id}-actual-${month}`} 
-                                                    className="text-center border-r"
-                                                >
-                                                    {getMonthValue(calibration, 'actual', month)}
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                        
-                                        {/* Remarks row */}
-                                        <TableRow key={`${calibration.id}-remarks`} className="hover:bg-gray-50 border-b-2">
-                                            <TableCell className="text-xs border-r bg-gray-50">
-                                                <Button 
-                                                    variant="link" 
-                                                    className="h-4 p-0 text-xs"
-                                                    onClick={() => openStatusDialog(calibration, 'remarks')}
-                                                >
-                                                    Remarks
-                                                </Button>
-                                            </TableCell>
-                                            {months.map(month => (
-                                                <TableCell 
-                                                    key={`${calibration.id}-remarks-${month}`} 
-                                                    className="text-center border-r"
-                                                >
-                                                    {getMonthValue(calibration, 'remarks', month)}
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    </>
-                                ))
-                            ) : (
+                <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
+                    <div className="relative overflow-x-auto">
+                        <Table className="min-w-full">
+                            <TableHeader className="bg-gray-50">
                                 <TableRow>
-                                    <TableCell colSpan={16} className="text-center py-4">
-                                        No calibration records found
-                                    </TableCell>
+                                    <TableHead className="w-[200px] font-medium border-r">Instrument Name/Eq.Code</TableHead>
+                                    <TableHead className="w-[120px] font-medium border-r">Issued to</TableHead>
+                                    <TableHead className="w-[180px] font-medium border-r">Frequency of Calibration</TableHead>
+                                    <TableHead className="w-[80px] font-medium border-r">Status</TableHead>
+                                    {months.map(month => (
+                                        <TableHead key={month} className="w-[60px] font-medium text-center border-r">
+                                            {month.charAt(0).toUpperCase() + month.slice(1)}
+                                        </TableHead>
+                                    ))}
+                                    <TableHead className="w-[80px] font-medium border-r">Actions</TableHead>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {isLoading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={16} className="text-center py-8">
+                                            <div className="flex justify-center">
+                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : calibrations.length > 0 ? (
+                                    calibrations.map((calibration) => (
+                                        <>
+                                            {/* Main row with instrument info */}
+                                            <TableRow key={`${calibration.id}-main`} className="hover:bg-gray-50/50">
+                                                <TableCell className="font-medium border-r" rowSpan={3}>
+                                                    {calibration.instrument_name_or_eq_code}
+                                                </TableCell>
+                                                <TableCell className="border-r" rowSpan={3}>
+                                                    {calibration.issued_to}
+                                                </TableCell>
+                                                <TableCell className="border-r" rowSpan={3}>
+                                                    {calibration.freq_of_cal}
+                                                </TableCell>
+                                                <TableCell className="text-xs border-r bg-blue-50">
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700"
+                                                        onClick={() => openStatusDialog(calibration, 'planned')}
+                                                    >
+                                                        Planned
+                                                    </Button>
+                                                </TableCell>
+                                                {months.map(month => (
+                                                    <TableCell 
+                                                        key={`${calibration.id}-planned-${month}`} 
+                                                        className="text-center border-r bg-blue-50"
+                                                    >
+                                                        {getMonthValue(calibration, 'planned', month)}
+                                                    </TableCell>
+                                                ))}
+                                                <TableCell className="border-r" rowSpan={3}>
+                                                    <div className="flex space-x-1">
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="sm" 
+                                                            onClick={() => openEditDialog(calibration)}
+                                                            className="text-gray-600 hover:text-gray-900"
+                                                        >
+                                                            <Edit className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="sm" 
+                                                            onClick={() => handleDelete(calibration.id)}
+                                                            className="text-red-500 hover:text-red-700"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                            
+                                            {/* Actual row */}
+                                            <TableRow key={`${calibration.id}-actual`} className="hover:bg-gray-50/50">
+                                                <TableCell className="text-xs border-r bg-green-50">
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        className="h-6 px-2 text-xs text-green-600 hover:text-green-700"
+                                                        onClick={() => openStatusDialog(calibration, 'actual')}
+                                                    >
+                                                        Actual
+                                                    </Button>
+                                                </TableCell>
+                                                {months.map(month => (
+                                                    <TableCell 
+                                                        key={`${calibration.id}-actual-${month}`} 
+                                                        className="text-center border-r bg-green-50"
+                                                    >
+                                                        {getMonthValue(calibration, 'actual', month)}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                            
+                                            {/* Remarks row */}
+                                            <TableRow key={`${calibration.id}-remarks`} className="hover:bg-gray-50/50">
+                                                <TableCell className="text-xs border-r bg-yellow-50">
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        className="h-6 px-2 text-xs text-yellow-600 hover:text-yellow-700"
+                                                        onClick={() => openStatusDialog(calibration, 'remarks')}
+                                                    >
+                                                        Remarks
+                                                    </Button>
+                                                </TableCell>
+                                                {months.map(month => (
+                                                    <TableCell 
+                                                        key={`${calibration.id}-remarks-${month}`} 
+                                                        className="text-center border-r bg-yellow-50"
+                                                    >
+                                                        {getMonthValue(calibration, 'remarks', month)}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        </>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={16} className="text-center py-8 text-gray-500">
+                                            No calibration records found. Add your first calibration record to get started.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </div>
             </div>
 
             {/* Status Update Dialog */}
             <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-[600px]">
                     <DialogHeader>
-                        <DialogTitle>
+                        <DialogTitle className="text-lg">
                             Update {currentField === 'planned' ? 'Planned' : 
                                   currentField === 'actual' ? 'Actual' : 'Remarks'} Status
                         </DialogTitle>
                     </DialogHeader>
                     
-                    <div className="grid gap-4 py-4">
+                    <div className="space-y-6 py-2">
                         <div>
-                            <Label className="mb-2 block">Select Months</Label>
-                            <div className="grid grid-cols-3 gap-2">
+                            <Label className="mb-3 block">Select Months</Label>
+                            <div className="grid grid-cols-3 gap-3">
                                 {months.map(month => (
                                     <div key={month} className="flex items-center space-x-2">
                                         <Checkbox 
@@ -935,36 +959,36 @@ const printReport = () => {
                                             checked={selectedMonths[month] || false}
                                             onCheckedChange={() => toggleMonthSelection(month)}
                                         />
-                                        <label htmlFor={`month-${month}`} className="text-sm font-medium leading-none">
+                                        <Label htmlFor={`month-${month}`} className="text-sm font-normal">
                                             {month.charAt(0).toUpperCase() + month.slice(1)}
-                                        </label>
+                                        </Label>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
                         {currentField !== 'remarks' ? (
-                            <div>
-                                <Label htmlFor="status-value" className="mb-2 block">
+                            <div className="space-y-2">
+                                <Label htmlFor="status-value">
                                     {currentField === 'planned' ? 'Planned Status' : 'Actual Status'}
                                 </Label>
                                 <Input
                                     id="status-value"
                                     value={statusValue}
                                     onChange={(e) => setStatusValue(e.target.value)}
-                                    placeholder="Enter status"
+                                    placeholder={currentField === 'planned' ? 'Enter planned status' : 'Enter actual status'}
                                 />
                             </div>
                         ) : (
-                            <div>
-                                <Label htmlFor="remarks-value" className="mb-2 block">
+                            <div className="space-y-2">
+                                <Label htmlFor="remarks-value">
                                     Remarks
                                 </Label>
                                 <Input
                                     id="remarks-value"
                                     value={remarksValue}
                                     onChange={(e) => setRemarksValue(e.target.value)}
-                                    placeholder="Enter remarks"
+                                    placeholder="Enter remarks or notes"
                                 />
                             </div>
                         )}
@@ -987,7 +1011,7 @@ const printReport = () => {
                                 Object.values(selectedMonths).filter(Boolean).length === 0
                             }
                         >
-                            Update
+                            Update Status
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -995,53 +1019,56 @@ const printReport = () => {
 
             {/* Edit Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
-                        <DialogTitle>Edit Calibration</DialogTitle>
+                        <DialogTitle className="text-lg">Edit Calibration</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleEditSubmit} className="space-y-4">
-                        <div>
-                            <label htmlFor="edit-instrument_name_or_eq_code" className="block text-sm font-medium mb-1">
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-instrument_name_or_eq_code">
                                 Instrument Name/Eq. Code
-                            </label>
+                            </Label>
                             <Input
                                 id="edit-instrument_name_or_eq_code"
                                 name="instrument_name_or_eq_code"
                                 value={formData.instrument_name_or_eq_code}
                                 onChange={handleInputChange}
                                 required
+                                placeholder="Enter instrument name or code"
                             />
                         </div>
-                        <div>
-                            <label htmlFor="edit-issued_to" className="block text-sm font-medium mb-1">
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-issued_to">
                                 Issued To
-                            </label>
+                            </Label>
                             <Input
                                 id="edit-issued_to"
                                 name="issued_to"
                                 value={formData.issued_to}
                                 onChange={handleInputChange}
+                                placeholder="Enter department or person"
                             />
                         </div>
-                        <div>
-                            <label htmlFor="edit-freq_of_cal" className="block text-sm font-medium mb-1">
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-freq_of_cal">
                                 Frequency of Calibration
-                            </label>
+                            </Label>
                             <Input
                                 id="edit-freq_of_cal"
                                 name="freq_of_cal"
                                 value={formData.freq_of_cal}
                                 onChange={handleInputChange}
+                                placeholder="e.g. Quarterly, Annually"
                             />
                         </div>
-                        <div className="flex justify-end space-x-2">
+                        <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                                 Cancel
                             </Button>
                             <Button type="submit">
                                 Save Changes
                             </Button>
-                        </div>
+                        </DialogFooter>
                     </form>
                 </DialogContent>
             </Dialog>
