@@ -29,6 +29,7 @@ Route::controller(InventoryController::class)->group(function () {
     Route::delete('inventory/{id}', 'destroy')->name('inventory.destroy');
     Route::get('inventory/{id}', 'show')->name('inventory.show');
     Route::get('fetch', 'maintenance_equipment')->name('inventory.maintenance_equipment');
+    Route::get('fetch/schedule', 'maintenance_schedule_activities')->name('inventory.maintenance_schedule_activities');
 });
 
 Route::controller(OfficeController::class)->group(function () {

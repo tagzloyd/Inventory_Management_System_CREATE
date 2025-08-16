@@ -36,7 +36,21 @@ class InventoryController extends Controller
 
         return $equipmentSummary;
     }
+    public function maintenance_schedule_activities()
+    {
+        $activities = DB::table('inventory')
+        ->select(
+            'maintenance_schedule',
+            'maintenance_activities',
+        )
+        ->groupby('maintenance_schedule')
+        ->groupby('maintenance_activities')
+        ->orderBy('maintenance_schedule')
+        ->orderby('maintenance_activities')
+        ->get();
 
+        return $activities;
+    }
 
      public function fetchFaculties()
     {
