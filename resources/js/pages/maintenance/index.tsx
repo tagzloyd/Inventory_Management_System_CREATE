@@ -25,7 +25,6 @@ interface MaintenanceItem {
     updated_at?: string;
 }
 
-
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Inventory Management', href: '/dashboard' },
     { title: 'Maintenance', href: '/maintenance' },
@@ -55,9 +54,6 @@ export default function Maintenance() {
     useEffect(() => {
         fetchMaintenanceItems();
     }, []);
-
-
-    
 
     const fetchMaintenanceItems = async () => {
         try {
@@ -201,23 +197,19 @@ export default function Maintenance() {
         non_functional_count: number;
         defective_count: number;
         under_repair_count: number;
-    }
-
-    interface Maintenance_SchedItem{
-    maintenance_schedule: string | null;
-    maintenance_activities: string | null;
+        maintenance_schedule: string;
+        maintenance_activities: string;
+        
+        
     }
 
     // Add this to your component state
-    
-    const [maintenancSchedItem, setMaintenanceSchedItem] = useState<Maintenance_SchedItem[]>([]);
     const [equipmentSummary, setEquipmentSummary] = useState<EquipmentSummary[]>([]);
 
     // Add this to your useEffect to fetch the equipment data
     useEffect(() => {
         fetchMaintenanceItems();
-        fetchEquipmentSummary();
-        fetchMaintenanceSchedItems(); // Add this line
+        fetchEquipmentSummary(); // Add this line
     }, []);
 
     // Add this function to fetch equipment data
@@ -230,15 +222,6 @@ export default function Maintenance() {
             toast.error('Failed to load equipment summary');
         }
     };
-    const fetchMaintenanceSchedItems = async () => {
-        try {
-            const response = await axios.get('/api/fetch/schedule');
-            setMaintenanceSchedItem(response.data);
-        } catch (err) {
-            console.error('Error fetching maintenance schedule and activities:', err);
-            toast.error('Failed to load maintenance schedule and activities');
-        }
-    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -423,35 +406,23 @@ export default function Maintenance() {
                             </TableHeader>
                             <TableBody>
                                 {equipmentSummary.length > 0 ? (
-                                    equipmentSummary.map((equipment, index) => {
-                                        // Get corresponding maintenance schedule item if it exists
-                                        const maintenanceItem = maintenancSchedItem[index] || {
-                                            maintenance_schedule: null,
-                                            maintenance_activities: null
-                                        };
-
-                                        return (
-                                            <TableRow key={equipment.equipment_name}>
-                                                <TableCell className="border">{equipment.equipment_name}</TableCell>
-                                                <TableCell className="border text-center">{equipment.total_count}</TableCell>
-                                                <TableCell className="border">
-                                                    {equipment.functional_count} functional, 
-                                                    <br />
-                                                    {equipment.non_functional_count} non-functional,
-                                                    <br />
-                                                    {equipment.defective_count} defective,
-                                                    <br />
-                                                    {equipment.under_repair_count} under repair
-                                                </TableCell>
-                                                <TableCell className="border">
-                                                    {maintenanceItem.maintenance_schedule || 'N/A'}
-                                                </TableCell>
-                                                <TableCell className="border">
-                                                    {maintenanceItem.maintenance_activities || 'N/A'}
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })
+                                    equipmentSummary.map((item) => (
+                                        <TableRow key={item.equipment_name}>
+                                            <TableCell className="border">{item.equipment_name}</TableCell>
+                                            <TableCell className="border text-center">{item.total_count}</TableCell>
+                                            <TableCell className="border">
+                                                {item.functional_count} functional, 
+                                                <br />
+                                                {item.non_functional_count} non-functional,
+                                                <br />
+                                                {item.defective_count} defective,
+                                                <br />
+                                                {item.under_repair_count} under repair
+                                            </TableCell>
+                                            <TableCell className="border">{item.maintenance_schedule}</TableCell>
+                                            <TableCell className="border">{item.maintenance_activities}</TableCell>
+                                        </TableRow>
+                                    ))
                                 ) : (
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center py-4">

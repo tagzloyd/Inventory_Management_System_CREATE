@@ -24,32 +24,23 @@ class InventoryController extends Controller
         $equipmentSummary = DB::table('inventory')
             ->select(
                 'equipment_name',
+                'maintenance_schedule',
+                'maintenance_activities',
                 DB::raw('COUNT(*) as total_count'),
                 DB::raw("SUM(CASE WHEN LOWER(remarks) = 'functional' THEN 1 ELSE 0 END) as functional_count"),
                 DB::raw("SUM(CASE WHEN LOWER(remarks) = 'non-functional' THEN 1 ELSE 0 END) as non_functional_count"),
                 DB::raw("SUM(CASE WHEN LOWER(remarks) = 'defective' THEN 1 ELSE 0 END) as defective_count"),
                 DB::raw("SUM(CASE WHEN LOWER(remarks) = 'under repair' THEN 1 ELSE 0 END) as under_repair_count")
             )
-            ->groupBy('equipment_name')
-            ->orderBy('equipment_name')
+            ->groupBy('equipment_name')  
+            ->groupBy('maintenance_activities')
+            ->groupBy('maintenance_schedule')
+            ->orderBy('equipment_name')  
+            ->orderBy('maintenance_activities')
+            ->orderBy('maintenance_schedule')
             ->get();
 
         return $equipmentSummary;
-    }
-    public function maintenance_schedule_activities()
-    {
-        $activities = DB::table('inventory')
-        ->select(
-            'maintenance_schedule',
-            'maintenance_activities',
-        )
-        ->groupby('maintenance_schedule')
-        ->groupby('maintenance_activities')
-        ->orderBy('maintenance_schedule')
-        ->orderby('maintenance_activities')
-        ->get();
-
-        return $activities;
     }
 
      public function fetchFaculties()
