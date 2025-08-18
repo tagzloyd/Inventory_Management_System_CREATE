@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Consumable;
+use Illuminate\Support\Facades\DB; // <-- add this
 use Illuminate\Support\Facades\Validator;
 
 class ConsumableController extends Controller
@@ -16,15 +17,23 @@ class ConsumableController extends Controller
 
     public function fetch()
     {
-        try {
-            $consumables = Consumable::all();
-            return response()->json($consumables);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to fetch consumable items',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        $consumables = DB::table('consumables')
+            ->select(
+                'id',
+                'item_name',
+                'description',
+                'quantity',
+                DB::raw("
+                    CASE
+                        WHEN quantity = 0 THEN 'Out of Stock'
+                        WHEN quantity BETWEEN 1 AND 10 THEN 'Low Stock'
+                        ELSE 'Available'
+                    END as status
+                ")
+            )
+            ->get();
+
+        return $consumables;
     }
 
     public function store(Request $request)
@@ -32,8 +41,7 @@ class ConsumableController extends Controller
         $validator = Validator::make($request->all(), [
             'item_name' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
-            'quantity' => 'required|integer|min:0',
-            'status' => 'required|string|in:Available,Low Stock,Out of Stock',
+            'quantity' => 'required|integer|min:0'
         ]);
 
         if ($validator->fails()) {
@@ -62,8 +70,7 @@ class ConsumableController extends Controller
         $validator = Validator::make($request->all(), [
             'item_name' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
-            'quantity' => 'required|integer|min:0',
-            'status' => 'required|string|in:Available,Low Stock,Out of Stock',
+            'quantity' => 'required|integer|min:0'
         ]);
 
         if ($validator->fails()) {

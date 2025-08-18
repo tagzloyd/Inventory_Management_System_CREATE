@@ -29,7 +29,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Inventory Management', href: '/dashboard' },
@@ -69,7 +68,7 @@ export default function Consumable() {
   const [itemToDelete, setItemToDelete] = useState<number | null>(null)
   const [formData, setFormData] = useState<Omit<ConsumableItem, 'id'>>(DEFAULT_CONSUMABLE_ITEM)
 
-  // Memoized fetch function with error handling
+  // Fetch items
   const fetchConsumableItems = useCallback(async () => {
     setLoading(true)
     try {
@@ -79,132 +78,97 @@ export default function Consumable() {
     } catch (err) {
       console.error('Error fetching consumable items:', err)
       setError('Failed to load consumable items. Please try again later.')
-      toast.error('Could not load inventory data', {
-        description: axios.isAxiosError(err) 
-          ? err.response?.data?.message || 'Network error occurred'
-          : 'An unexpected error occurred'
-      })
+      toast.error('Could not load inventory data')
     } finally {
       setLoading(false)
     }
   }, [])
 
-  // Initial data load
   useEffect(() => {
     fetchConsumableItems()
   }, [fetchConsumableItems])
 
   const openAddDialog = () => {
-  setFormData(DEFAULT_CONSUMABLE_ITEM)
-  setAddDialogOpen(true)
-}
+    setFormData(DEFAULT_CONSUMABLE_ITEM)
+    setAddDialogOpen(true)
+  }
 
-const openUpdateDialog = (item: ConsumableItem) => {
-  setCurrentItem(item)
-  setFormData({
-    item_name: item.item_name,
-    description: item.description || '',
-    quantity: item.quantity,
-    status: item.status
-  })
-  setUpdateDialogOpen(true)
-}
+  const openUpdateDialog = (item: ConsumableItem) => {
+    setCurrentItem(item)
+    setFormData({
+      item_name: item.item_name,
+      description: item.description || '',
+      quantity: item.quantity,
+      status: item.status
+    })
+    setUpdateDialogOpen(true)
+  }
 
-const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const { name, value } = e.target
-  setFormData(prev => ({
-    ...prev,
-    [name]: name === 'quantity' ? parseInt(value) || 0 : value
-  }))
-}
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'quantity' ? parseInt(value) || 0 : value
+    }))
+  }
 
-const handleStatusChange = (value: ConsumableStatus) => {
-  setFormData(prev => ({
-    ...prev,
-    status: value
-  }))
-}
-
-const openDeleteDialog = (id: number) => {
+  const openDeleteDialog = (id: number) => {
     setItemToDelete(id)
     setDeleteDialogOpen(true)
   }
 
-const handleAdd = async () => {
-  if (!formData.item_name.trim()) {
-    toast.error('Validation Error', {
-      description: 'Item name is required'
-    })
-    return
+  const handleAdd = async () => {
+    if (!formData.item_name.trim()) {
+      toast.error('Validation Error', { description: 'Item name is required' })
+      return
+    }
+
+    setProcessing(-1)
+    try {
+      await axios.post('/api/consumable/store', formData)
+      toast.success('Item added successfully')
+      setAddDialogOpen(false)
+      setFormData(DEFAULT_CONSUMABLE_ITEM)
+      await fetchConsumableItems()
+    } catch {
+      toast.error('Failed to add item')
+    } finally {
+      setProcessing(null)
+    }
   }
 
-  setProcessing(-1)
-  try {
-    await axios.post('/api/consumable/store', formData)
-    toast.success('Item added successfully')
-    setAddDialogOpen(false)
-    setFormData(DEFAULT_CONSUMABLE_ITEM)
-    await fetchConsumableItems() // Refresh the list
-  } catch (err) {
-    console.error('Error adding item:', err)
-    toast.error('Failed to add item', {
-      description: axios.isAxiosError(err) 
-        ? err.response?.data?.message || 'Validation error'
-        : 'An unexpected error occurred'
-    })
-  } finally {
-    setProcessing(null)
-  }
-}
+  const handleUpdate = async () => {
+    if (!currentItem || !formData.item_name.trim()) return
 
-const handleUpdate = async () => {
-  if (!currentItem || !formData.item_name.trim()) {
-    toast.error('Validation Error', {
-      description: 'Item name is required'
-    })
-    return
+    setProcessing(currentItem.id)
+    try {
+      await axios.put(`/api/consumable/${currentItem.id}`, formData)
+      toast.success('Item updated successfully')
+      setUpdateDialogOpen(false)
+      setCurrentItem(null)
+      await fetchConsumableItems()
+    } catch {
+      toast.error('Failed to update item')
+    } finally {
+      setProcessing(null)
+    }
   }
 
-  setProcessing(currentItem.id)
-  try {
-    await axios.put(`/api/consumable/${currentItem.id}`, formData)
-    toast.success('Item updated successfully')
-    setUpdateDialogOpen(false)
-    setCurrentItem(null)
-    await fetchConsumableItems() // Refresh the list
-  } catch (err) {
-    console.error('Error updating item:', err)
-    toast.error('Update failed', {
-      description: axios.isAxiosError(err) 
-        ? err.response?.data?.message || 'Validation error'
-        : 'Failed to update item'
-    })
-  } finally {
-    setProcessing(null)
+  const handleDelete = async () => {
+    if (!itemToDelete) return
+    setProcessing(itemToDelete)
+    try {
+      await axios.delete(`/api/consumable/${itemToDelete}`)
+      toast.success('Item deleted successfully')
+      setDeleteDialogOpen(false)
+      await fetchConsumableItems()
+    } catch {
+      toast.error('Failed to delete item')
+    } finally {
+      setProcessing(null)
+      setItemToDelete(null)
+    }
   }
-}
-
-const handleDelete = async () => {
-  if (!itemToDelete) return
-
-  setProcessing(itemToDelete)
-  try {
-    await axios.delete(`/api/consumable/${itemToDelete}`)
-    toast.success('Item deleted successfully')
-    setDeleteDialogOpen(false)
-    await fetchConsumableItems() // Refresh the list
-  } catch (err) {
-    console.error('Error deleting item:', err)
-    toast.error('Deletion failed', {
-      description: axios.isAxiosError(err) 
-        ? err.response?.data?.message || 'Item may be in use elsewhere'
-        : 'Failed to delete item'
-    })
-  } finally {
-    setProcessing(null)
-    setItemToDelete(null)
-  }
-}
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -214,18 +178,11 @@ const handleDelete = async () => {
         <div className="space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <CardTitle className="text-2xl font-semibold tracking-tight">
-                Consumable Items Management
-              </CardTitle>
-              <CardDescription className="mt-1">
-                Manage and track your consumable items efficiently.
-              </CardDescription>
+              <CardTitle className="text-2xl font-semibold">Consumables Monitoring & Control</CardTitle>
+              <CardDescription>Stay on top of stock levels and usage of consumable materials.</CardDescription>
             </div>
 
-            <Button 
-              className="rounded-xl shadow-md hover:shadow-lg transition-shadow"
-              onClick={openAddDialog}
-            >
+            <Button onClick={openAddDialog}>
               <Plus className="h-4 w-4 mr-2" /> Add Item
             </Button>
           </div>
@@ -235,15 +192,12 @@ const handleDelete = async () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead
-                      colSpan={5}
-                      className="border-b bg-gray-50/95 text-center text-lg font-semibold"
-                    >
+                    <TableHead colSpan={5} className="text-center font-semibold">
                       Consumable Inventory
                     </TableHead>
                   </TableRow>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-[200px]">Name of Item</TableHead>
+                  <TableRow>
+                    <TableHead>Name of Item</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead className="text-center">Quantity</TableHead>
                     <TableHead className="text-center">Status</TableHead>
@@ -253,24 +207,15 @@ const handleDelete = async () => {
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8">
-                        <div className="flex items-center justify-center gap-2 text-gray-500">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Loading inventory...
-                        </div>
-                      </TableCell>
+                      <TableCell colSpan={5} className="text-center py-8">Loading...</TableCell>
                     </TableRow>
                   ) : consumableItems.length > 0 ? (
                     consumableItems.map((item) => (
-                      <TableRow key={item.id} className="hover:bg-gray-50/80">
-                        <TableCell className="border font-medium">{item.item_name}</TableCell>
-                        <TableCell className="border text-ellipsis max-w-[200px] truncate">
-                          {item.description}
-                        </TableCell>
-                        <TableCell className="border text-center">
-                          {item.quantity}
-                        </TableCell>
-                        <TableCell className="border text-center">
+                      <TableRow key={item.id}>
+                        <TableCell>{item.item_name}</TableCell>
+                        <TableCell>{item.description}</TableCell>
+                        <TableCell className="text-center">{item.quantity}</TableCell>
+                        <TableCell className="text-center">
                           <Badge
                             variant="outline"
                             className={
@@ -284,25 +229,13 @@ const handleDelete = async () => {
                             {item.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="border">
+                        <TableCell className="text-center">
                           <div className="flex justify-center gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => openUpdateDialog(item)}
-                              disabled={processing === item.id}
-                            >
-                              <Pencil className="h-4 w-4 mr-1" />
-                              Edit
+                            <Button size="sm" variant="outline" onClick={() => openUpdateDialog(item)}>
+                              <Pencil className="h-4 w-4 mr-1" /> Edit
                             </Button>
-                            <Button 
-                              size="sm" 
-                              variant="destructive" 
-                              onClick={() => openDeleteDialog(item.id)}
-                              disabled={processing === item.id}
-                            >
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Delete
+                            <Button size="sm" variant="destructive" onClick={() => openDeleteDialog(item.id)}>
+                              <Trash2 className="h-4 w-4 mr-1" /> Delete
                             </Button>
                           </div>
                         </TableCell>
@@ -311,7 +244,7 @@ const handleDelete = async () => {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-6 text-gray-500">
-                        {error || 'No consumable items found. Add your first item to get started.'}
+                        {error || 'No consumable items found.'}
                       </TableCell>
                     </TableRow>
                   )}
@@ -322,57 +255,37 @@ const handleDelete = async () => {
         </div>
       </div>
 
-      {/* Add/Edit Item Dialog */}
-      <Dialog 
-        open={addDialogOpen || updateDialogOpen} 
-        onOpenChange={(open) => {
-          if (!open) {
-            addDialogOpen ? setAddDialogOpen(false) : setUpdateDialogOpen(false)
-          }
-        }}
-      >
-        <DialogContent className="sm:max-w-[425px]">
+      {/* Add/Edit Dialog (NO Status dropdown) */}
+      <Dialog open={addDialogOpen || updateDialogOpen} onOpenChange={() => {
+        addDialogOpen ? setAddDialogOpen(false) : setUpdateDialogOpen(false)
+      }}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {addDialogOpen ? 'Add New' : 'Edit'} Consumable Item
-            </DialogTitle>
-            <DialogDescription>
-              {addDialogOpen 
-                ? 'Fill in the details of the new consumable item.'
-                : 'Update the details of this consumable item.'}
-            </DialogDescription>
+            <DialogTitle>{addDialogOpen ? 'Add New' : 'Edit'} Consumable Item</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="item_name" className="text-right">
-                Item Name
-              </Label>
+              <Label htmlFor="item_name" className="text-right">Item Name</Label>
               <Input
                 id="item_name"
                 name="item_name"
                 value={formData.item_name}
                 onChange={handleInputChange}
                 className="col-span-3"
-                placeholder="Enter item name"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="description" className="text-right">
-                Description
-              </Label>
+              <Label htmlFor="description" className="text-right">Description</Label>
               <Input
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
                 className="col-span-3"
-                placeholder="Enter description"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="quantity" className="text-right">
-                Quantity
-              </Label>
+              <Label htmlFor="quantity" className="text-right">Quantity</Label>
               <Input
                 id="quantity"
                 name="quantity"
@@ -383,69 +296,26 @@ const handleDelete = async () => {
                 min="0"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right">
-                Status
-              </Label>
-              <Select 
-                value={formData.status} 
-                onValueChange={handleStatusChange}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Available">Available</SelectItem>
-                  <SelectItem value="Low Stock">Low Stock</SelectItem>
-                  <SelectItem value="Out of Stock">Out of Stock</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
           <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => addDialogOpen ? setAddDialogOpen(false) : setUpdateDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="button" 
-              onClick={addDialogOpen ? handleAdd : handleUpdate}
-              disabled={!formData.item_name.trim() || 
-                (addDialogOpen ? processing === -1 : processing === currentItem?.id)}
-            >
-              {(addDialogOpen ? processing === -1 : processing === currentItem?.id) ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : null}
+            <Button variant="outline" onClick={() => addDialogOpen ? setAddDialogOpen(false) : setUpdateDialogOpen(false)}>Cancel</Button>
+            <Button onClick={addDialogOpen ? handleAdd : handleUpdate}>
               {addDialogOpen ? 'Add Item' : 'Save Changes'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the consumable item from your inventory.
-            </AlertDialogDescription>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              disabled={processing === itemToDelete}
-              className="bg-destructive text-outline-foreground hover:bg-destructive/90"
-            >
-              {processing === itemToDelete ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : null}
-              Delete
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
