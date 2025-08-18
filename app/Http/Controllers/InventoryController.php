@@ -33,7 +33,7 @@ class InventoryController extends Controller
                 DB::raw("SUM(CASE WHEN LOWER(remarks) = 'under repair' THEN 1 ELSE 0 END) as under_repair_count")
             )
             ->groupBy('equipment_name')  
-            ->groupBy('maintenance_activities')
+            ->groupBy('maintenance_activities') 
             ->groupBy('maintenance_schedule')
             ->orderBy('equipment_name')  
             ->orderBy('maintenance_activities')
