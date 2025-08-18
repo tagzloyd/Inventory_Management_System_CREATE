@@ -10,6 +10,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { useState, FormEvent, useEffect } from 'react';
 import axios from 'axios';
+import { Download } from 'lucide-react';
 
 interface MaintenanceItem {
     id: number;
@@ -310,6 +311,7 @@ export default function Maintenance() {
 
                 {/* Maintenance Schedule Table */}
                 <Card className="overflow-x-auto shadow-sm border">
+                    
                     <CardContent className="p-4">
                         {loading ? (
                             <div className="flex justify-center items-center py-8">
@@ -419,8 +421,8 @@ export default function Maintenance() {
                                                 <br />
                                                 {item.under_repair_count} under repair
                                             </TableCell>
-                                            <TableCell className="border">{item.maintenance_schedule}</TableCell>
-                                            <TableCell className="border">{item.maintenance_activities}</TableCell>
+                                            <TableCell className="border align-top whitespace-normal p-4">{item.maintenance_schedule}</TableCell>
+                                            <TableCell className="border align-top whitespace-normal p-4">{item.maintenance_activities}</TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
