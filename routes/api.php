@@ -10,6 +10,8 @@ use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\CalibrationController;
 use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\ConsumableController;
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -80,5 +82,10 @@ Route::controller(MaintenanceController::class)->prefix('maintenance')->group(fu
     Route::delete('/{id}', 'destroy')->name('maintenance.destroy');
 });
 
-// Remove this duplicate route definition
-// Route::resource('maintenance', MaintenanceController::class);
+Route::controller(ConsumableController::class)->prefix('consumable')->group(function(){
+    Route::get('/', 'index')->name('controller.index');
+    Route::get('/fetch', 'fetch')->name('controller.fetch');
+    Route::post('/store', 'store')->name('controller.store');
+    Route::put('/{id}', 'update')->name('controller.update');
+    Route::delete('/{id}', 'destroy')->name('controller.destroy');
+});
