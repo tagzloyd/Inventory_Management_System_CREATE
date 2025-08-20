@@ -832,7 +832,6 @@ export default function InventoryIndex() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none">Date Acquired</label>
                   <Input
-                    type="date"
                     value={form.date_acquired || ""}
                     onChange={e => setForm({ ...form, date_acquired: e.target.value })}
                   />

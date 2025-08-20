@@ -352,7 +352,7 @@ export default function Maintenance() {
                                                     {item.quarterly}
                                                 </TableCell>
                                                 <TableCell className="border align-top whitespace-normal p-4">
-                                                    {item.semi_annually}
+                                                    {item.semi_annually} 
                                                 </TableCell>
                                                 <TableCell className="border align-top whitespace-normal p-4">
                                                     {item.annually}
@@ -421,8 +421,8 @@ export default function Maintenance() {
                                                 <br />
                                                 {item.under_repair_count} under repair
                                             </TableCell>
-                                            <TableCell className="border align-top whitespace-normal p-4">{item.maintenance_schedule}</TableCell>
-                                            <TableCell className="border align-top whitespace-normal p-4">{item.maintenance_activities}</TableCell>
+                                        <TableCell className="border align-top whitespace-normal p-4">{item.maintenance_schedule || '-' }  </TableCell>
+                                            <TableCell className="border align-top whitespace-normal p-4">{item.maintenance_activities || '-'}</TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
