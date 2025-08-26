@@ -11,7 +11,7 @@ use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\CalibrationController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\ConsumableController;
-
+use App\Http\Controllers\RecordsController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -88,4 +88,8 @@ Route::controller(ConsumableController::class)->prefix('consumable')->group(func
     Route::post('/store', 'store')->name('controller.store');
     Route::put('/{id}', 'update')->name('controller.update');
     Route::delete('/{id}', 'destroy')->name('controller.destroy');
+});
+
+Route::controller(RecordsController::class)->prefix('records')->group(function(){
+    Route::get('/fetch', 'fetch')->name('records.fetch');
 });
